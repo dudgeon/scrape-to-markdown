@@ -95,6 +95,18 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 ---
 
+## Platform Abstraction + Tampermonkey Userscript
+
+> Extract Chrome-specific code behind interfaces. Ship a Tampermonkey userscript as an alternative distribution for environments where unpacked extensions are disabled. Depends on stable core pipeline (Phases 1–3).
+
+| # | Item | Status | Spec |
+|---|------|--------|------|
+| P.A | Interface extraction + extension adapters (refactor, no behavior change) | Backlog | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+| P.B | Core orchestrator extraction (`export-slack.ts`) | Backlog | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+| P.C | Userscript adapters + floating panel UI + build config | Backlog | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+
+---
+
 ## Phase 5: Polish + Resilience
 
 > Hardening, UX improvements, and advanced features that build on everything above.
@@ -120,6 +132,11 @@ This is the single source of truth for planned work, priorities, and feature sta
 - The frontmatter template engine is shared infrastructure — both Slack and web clips use it.
 - Building it first means web clipping ships with frontmatter from day one.
 - Frontmatter is a smaller, self-contained feature that doesn't require new libraries or manifest changes.
+
+**Platform Abstraction can run in parallel with Phase 4** because:
+- It only touches the Chrome-coupling seam, not the markdown/template logic that web clipping extends.
+- P.A and P.B are pure refactors with no behavior change — low conflict risk.
+- P.C (userscript) is a new entry point, not a modification to existing code.
 
 **Phase 4 (Web Clipping) before Phase 5 (Polish)** because:
 - Web clipping adds the most user value after core Slack features.
