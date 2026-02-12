@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Slack Conversation Copier** — a Chrome Extension (Manifest V3) that converts Slack conversations into clean markdown. Uses Slack's internal `xoxc-` session token to call `conversations.history` API directly, with DOM scraping planned as a future fallback.
+**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) that scrapes web content and converts it to clean markdown. Currently implements Slack conversation capture via the internal `xoxc-` session token and `conversations.history` API. Future phases add general web page clipping (Readability.js + Turndown.js) and configurable YAML frontmatter.
 
-The detailed specification lives in `docs/slack-convo-copier-spec.md`.
+The Slack feature specification lives in `docs/slack-convo-copier-spec.md`. See `docs/ROADMAP.md` for the full feature roadmap.
 
 ## Commands
 

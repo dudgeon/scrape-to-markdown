@@ -1,5 +1,5 @@
 {
-  "name": "slack-scrape-extension",
+  "name": "scrape-to-markdown",
   "version": "0.1.0",
   "description": "Copy Slack conversations as clean markdown",
   "type": "module",

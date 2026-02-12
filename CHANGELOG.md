@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- Initial release: Slack Conversation Copier
+- Initial release: scrape-to-markdown (s2md) — Slack conversation capture
 - API-first message capture using Slack session token (auto-detected from `boot_data`)
 - Rich text → markdown conversion (bold, italic, strikethrough, code, links, emoji, @mentions, #channels)
 - Fallback to legacy `mrkdwn` format for older/bot messages

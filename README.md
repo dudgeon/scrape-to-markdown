@@ -1,6 +1,6 @@
-# Slack Conversation Copier
+# scrape-to-markdown (s2md)
 
-A Chrome extension that copies Slack conversations as clean markdown. Uses Slack's internal API to capture full message history — including threads, reactions, and file references — and converts everything to well-formatted markdown ready for note-taking, LLM context, or archival.
+A Chrome extension that scrapes web content — starting with Slack conversations — and converts it to clean markdown. Uses Slack's internal API to capture full message history including threads, reactions, and file references. Future phases add general web page clipping via Readability.js + Turndown.js.
 
 ## Installation
 
