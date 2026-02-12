@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Source category auto-detection: `slack-channel`, `slack-private-channel`, `slack-dm`, `slack-group-dm`
 - `team.info` API call for workspace name and domain in frontmatter
 - Frontmatter on/off toggle in popup ("Include YAML frontmatter" checkbox)
+- `{{variable|filter}}` template engine for customizable frontmatter fields
+- Built-in templates: Slack Default and Slack Detailed
+- Options/settings page (gear icon) for creating, editing, and managing custom frontmatter templates
+- Live YAML preview in template editor
+- 8 template filters: `date`, `lowercase`, `uppercase`, `default`, `join`, `slug`, `trim`, `truncate`
+- Flow diagram in README
 - `engines` field in `package.json` requiring Node >= 20
 
 ### Changed

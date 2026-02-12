@@ -17,7 +17,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.ts-loader-Dt6exkpb.js"
+        "assets/index.ts-loader-CqO8B1zO.js"
       ],
       "matches": [
         "https://app.slack.com/*"
@@ -37,6 +37,7 @@
       "128": "icons/icon128.png"
     }
   },
+  "options_page": "src/options/options.html",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -48,8 +49,8 @@
         "https://app.slack.com/*"
       ],
       "resources": [
-        "assets/constants-DPh_ER4P.js",
-        "assets/index.ts-C0auhXEZ.js"
+        "assets/constants-I65fpLFJ.js",
+        "assets/index.ts-ZAbrp5KF.js"
       ],
       "use_dynamic_url": false
     }

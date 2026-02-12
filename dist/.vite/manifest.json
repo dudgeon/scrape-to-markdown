@@ -1,43 +1,72 @@
 {
   "../../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-B3cVCk19.js",
+    "file": "assets/crx-manifest.js-CHL-RSfy.js",
     "name": "crx-manifest.js",
     "src": "../../../../@crx/manifest",
     "isEntry": true
   },
-  "_constants-DPh_ER4P.js": {
-    "file": "assets/constants-DPh_ER4P.js",
+  "_constants-I65fpLFJ.js": {
+    "file": "assets/constants-I65fpLFJ.js",
     "name": "constants"
   },
+  "_modulepreload-polyfill-B5Qt9EMX.js": {
+    "file": "assets/modulepreload-polyfill-B5Qt9EMX.js",
+    "name": "modulepreload-polyfill"
+  },
+  "_template-storage-CPUsiW84.js": {
+    "file": "assets/template-storage-CPUsiW84.js",
+    "name": "template-storage",
+    "imports": [
+      "_constants-I65fpLFJ.js"
+    ]
+  },
   "index.ts-loader.js": {
-    "file": "assets/index.ts-loader-Dt6exkpb.js",
+    "file": "assets/index.ts-loader-CqO8B1zO.js",
     "src": "index.ts-loader.js"
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-h6t5EUMx.js",
+    "file": "assets/index.ts-CPw9EFWp.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true,
     "imports": [
-      "_constants-DPh_ER4P.js"
+      "_constants-I65fpLFJ.js",
+      "_template-storage-CPUsiW84.js"
     ]
   },
   "src/content/index.ts": {
-    "file": "assets/index.ts-C0auhXEZ.js",
+    "file": "assets/index.ts-ZAbrp5KF.js",
     "name": "index.ts",
     "src": "src/content/index.ts",
     "isEntry": true,
     "imports": [
-      "_constants-DPh_ER4P.js"
+      "_constants-I65fpLFJ.js"
+    ]
+  },
+  "src/options/options.html": {
+    "file": "assets/options.html-Dz0j9qYg.js",
+    "name": "options.html",
+    "src": "src/options/options.html",
+    "isEntry": true,
+    "imports": [
+      "_modulepreload-polyfill-B5Qt9EMX.js",
+      "_template-storage-CPUsiW84.js",
+      "_constants-I65fpLFJ.js"
+    ],
+    "css": [
+      "assets/options-DXFVuk83.css"
     ]
   },
   "src/popup/popup.html": {
-    "file": "assets/popup.html-DQ5eP1zE.js",
+    "file": "assets/popup.html-zdKYGxqg.js",
     "name": "popup.html",
     "src": "src/popup/popup.html",
     "isEntry": true,
+    "imports": [
+      "_modulepreload-polyfill-B5Qt9EMX.js"
+    ],
     "css": [
-      "assets/popup-CWgaTzEv.css"
+      "assets/popup-BZas8PaL.css"
     ]
   }
 }

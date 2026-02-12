@@ -1,0 +1,1 @@
+const _="https://slack.com/api",a={TOKEN:"slack_xoxc_token",CHANNEL_ID:"current_channel_id",WORKSPACE_ID:"current_workspace_id",USER_CACHE:"user_display_name_cache",TEMPLATES:"frontmatter_templates"},s=1e3,t=200;export{t as A,a as S,_ as a,s as b};

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) that scrapes web content and converts it to clean markdown. Currently implements Slack conversation capture via the internal `xoxc-` session token and `conversations.history` API. Future phases add general web page clipping (Readability.js + Turndown.js) and configurable YAML frontmatter.
+**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) that scrapes web content and converts it to clean markdown. Currently implements Slack conversation capture via the internal `xoxc-` session token and `conversations.history` API, with configurable YAML frontmatter and a `{{variable|filter}}` template engine. Future phases add general web page clipping (Readability.js + Turndown.js).
 
 The Slack feature specification lives in `docs/slack-convo-copier-spec.md`. See `docs/ROADMAP.md` for the full feature roadmap.
 
