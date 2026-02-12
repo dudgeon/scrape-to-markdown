@@ -80,6 +80,21 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 ---
 
+## Unreads Pane Support (Future)
+
+> Scraping the `/unreads` view. Depends on `client.counts` undocumented API. See research notes in project history.
+
+| # | Item | Status | Notes |
+|---|------|--------|-------|
+| U.1 | Detect `/unreads` URL and branch to unreads code path | Backlog | Content script URL parser needs to handle literal `unreads` segment |
+| U.2 | `client.counts` → identify channels with unreads | Backlog | Single API call, returns all unread channels/DMs/MPIMs |
+| U.3 | Fetch unread messages per channel (`conversations.info` + `conversations.history`) | Backlog | 2 API calls per unread channel; consider user-selectable channel list |
+| U.4 | Multi-channel markdown output with `## #channel-name` section headers | Backlog | — |
+| U.5 | Thread replies within unreads scrape | Backlog | Requires `conversations.replies` per thread parent — multiplies API calls significantly. Deferred. |
+| U.6 | Collapsed conversation handling | Backlog | DOM-based approach impractical (double virtual scrolling, lazy-loaded sections). API-only path avoids this entirely. |
+
+---
+
 ## Phase 5: Polish + Resilience
 
 > Hardening, UX improvements, and advanced features that build on everything above.
