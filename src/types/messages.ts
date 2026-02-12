@@ -18,6 +18,7 @@ export interface FetchMessagesRequest {
   includeThreads?: boolean;
   includeReactions?: boolean;
   includeFiles?: boolean;
+  includeFrontmatter?: boolean;
 }
 
 export interface GetStatusRequest {

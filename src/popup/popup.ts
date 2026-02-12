@@ -25,6 +25,7 @@ const dateTo = document.getElementById('date-to') as HTMLInputElement;
 const includeThreads = document.getElementById('include-threads') as HTMLInputElement;
 const includeReactions = document.getElementById('include-reactions') as HTMLInputElement;
 const includeFiles = document.getElementById('include-files') as HTMLInputElement;
+const includeFrontmatter = document.getElementById('include-frontmatter') as HTMLInputElement;
 
 declare const __BUILD_VERSION__: string;
 
@@ -112,6 +113,7 @@ async function exportMessages(): Promise<string | null> {
       includeThreads: includeThreads.checked,
       includeReactions: includeReactions.checked,
       includeFiles: includeFiles.checked,
+      includeFrontmatter: includeFrontmatter.checked,
     });
 
     if (!response.success || !response.markdown) {

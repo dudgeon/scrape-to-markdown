@@ -28,8 +28,18 @@ export interface ConversationsInfoResponse extends SlackApiResponse {
     is_group: boolean;
     is_im: boolean;
     is_mpim: boolean;
+    is_private?: boolean;
     topic?: { value: string };
     purpose?: { value: string };
+  };
+}
+
+// team.info
+export interface TeamInfoResponse extends SlackApiResponse {
+  team: {
+    id: string;
+    name: string;
+    domain: string;
   };
 }
 

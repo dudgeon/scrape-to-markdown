@@ -2,6 +2,7 @@ import type {
   ConversationsHistoryResponse,
   ConversationsInfoResponse,
   ConversationsRepliesResponse,
+  TeamInfoResponse,
   UsersInfoResponse,
   SlackMessage,
 } from '../types/slack-api';
@@ -137,12 +138,36 @@ export async function fetchThreadReplies(
   return allMessages;
 }
 
-export async function fetchChannelInfo(channelId: string): Promise<{ name: string }> {
+export interface ChannelInfo {
+  id: string;
+  name: string;
+  is_channel: boolean;
+  is_group: boolean;
+  is_im: boolean;
+  is_mpim: boolean;
+  is_private?: boolean;
+}
+
+export async function fetchChannelInfo(channelId: string): Promise<ChannelInfo> {
   const resp = await slackApiCall<ConversationsInfoResponse>(
     'conversations.info',
     { channel: channelId },
   );
-  return { name: resp.channel.name };
+  const ch = resp.channel;
+  return {
+    id: ch.id,
+    name: ch.name,
+    is_channel: ch.is_channel,
+    is_group: ch.is_group,
+    is_im: ch.is_im,
+    is_mpim: ch.is_mpim,
+    is_private: ch.is_private,
+  };
+}
+
+export async function fetchTeamInfo(): Promise<{ name: string; domain: string }> {
+  const resp = await slackApiCall<TeamInfoResponse>('team.info', {});
+  return { name: resp.team.name, domain: resp.team.domain };
 }
 
 export async function fetchUserInfo(userId: string): Promise<{ displayName: string }> {

@@ -4,6 +4,7 @@ import { convertMrkdwn, type MrkdwnContext } from './mrkdwn';
 import {
   formatTimestamp,
   formatAuthorLine,
+  formatThreadHeader,
   formatReactions,
   formatFile,
   formatSystemMessage,
@@ -27,6 +28,8 @@ export interface ConverterOptions {
   includeFiles?: boolean;
   includeThreadReplies?: boolean;
   threadReplies?: Record<string, SlackMessage[]>;
+  /** When true, omits the document header (used when frontmatter is prepended instead). */
+  skipDocumentHeader?: boolean;
 }
 
 export function convertMessages(
@@ -42,7 +45,9 @@ export function convertMessages(
   const sections: string[] = [];
   let currentDate = '';
 
-  sections.push(formatDocumentHeader(options.channelName, messages.length));
+  if (!options.skipDocumentHeader) {
+    sections.push(formatDocumentHeader(options.channelName, messages.length));
+  }
 
   for (const msg of messages) {
     const { date, time } = formatTimestamp(msg.ts);
@@ -81,7 +86,7 @@ export function convertMessages(
       }
     }
 
-    // Thread replies
+    // Thread replies — grouped blockquote with header
     if (
       options.includeThreadReplies &&
       msg.thread_ts === msg.ts &&
@@ -89,23 +94,32 @@ export function convertMessages(
       msg.reply_count > 0
     ) {
       const replies = options.threadReplies?.[msg.ts];
-      if (replies) {
-        // Skip first element (it's the parent message)
+      if (replies && replies.length > 1) {
+        const parentBody = convertMessageBody(msg, ctx);
+        const replyCount = replies.length - 1; // exclude parent
+        const threadLines: string[] = [];
+
+        // Thread header with reply count + parent quote for disambiguation
+        threadLines.push(
+          formatThreadHeader(replyCount, authorName, time, parentBody),
+        );
+
+        // Each reply: author line + body, all blockquoted
         for (const reply of replies.slice(1)) {
           const { time: replyTime } = formatTimestamp(reply.ts);
           const replyAuthor = reply.user
             ? resolveUser(reply.user)
             : reply.username || 'Unknown';
 
-          sections.push(formatAuthorLine(replyAuthor, replyTime, true));
+          threadLines.push('>');
+          threadLines.push(`> **${replyAuthor}** \u2014 ${replyTime}`);
           const replyBody = convertMessageBody(reply, ctx);
-          sections.push(
-            replyBody
-              .split('\n')
-              .map((line) => `> ${line}`)
-              .join('\n'),
-          );
+          for (const line of replyBody.split('\n')) {
+            threadLines.push(`> ${line}`);
+          }
         }
+
+        sections.push(threadLines.join('\n'));
       }
     }
   }

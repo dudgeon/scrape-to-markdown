@@ -164,7 +164,7 @@ describe('convertMessages', () => {
     expect(result).toContain('[report.pdf](https://files.slack.com/report.pdf)');
   });
 
-  it('includes thread replies when enabled', () => {
+  it('renders thread block with header and grouped replies', () => {
     const parentTs = '1707580500.000000';
     const messages = [
       makeMessage({
@@ -191,8 +191,95 @@ describe('convertMessages', () => {
       includeThreadReplies: true,
       threadReplies,
     });
-    expect(result).toContain('(thread reply)');
-    expect(result).toContain('**Bob Smith**');
+    // Thread header with reply count and parent quote
+    expect(result).toContain('**Thread** (1 reply to Alice Johnson');
+    expect(result).toContain('\u201cThread parent\u201d');
+    // Reply author inside blockquote (no "(thread reply)" label)
+    expect(result).toContain('> **Bob Smith**');
     expect(result).toContain('> Thread reply');
+    expect(result).not.toContain('(thread reply)');
+  });
+
+  it('thread header truncates long parent messages', () => {
+    const parentTs = '1707580500.000000';
+    const longText = 'A'.repeat(100);
+    const messages = [
+      makeMessage({
+        ts: parentTs,
+        thread_ts: parentTs,
+        user: 'U001',
+        text: longText,
+        reply_count: 1,
+      }),
+    ];
+    const threadReplies = {
+      [parentTs]: [
+        makeMessage({ ts: parentTs, user: 'U001', text: longText }),
+        makeMessage({
+          ts: '1707580600.000000',
+          thread_ts: parentTs,
+          user: 'U002',
+          text: 'Reply',
+        }),
+      ],
+    };
+    const result = convertMessages(messages, {
+      ...baseOptions,
+      includeThreadReplies: true,
+      threadReplies,
+    });
+    // Thread header should truncate at 80 chars with ellipsis
+    const threadHeaderLine = result.split('\n').find((l) => l.includes('**Thread**'))!;
+    expect(threadHeaderLine).toContain('A'.repeat(80) + '\u2026');
+    expect(threadHeaderLine).not.toContain('A'.repeat(81));
+  });
+
+  it('thread header pluralizes reply count', () => {
+    const parentTs = '1707580500.000000';
+    const messages = [
+      makeMessage({
+        ts: parentTs,
+        thread_ts: parentTs,
+        user: 'U001',
+        text: 'Parent',
+        reply_count: 2,
+      }),
+    ];
+    const threadReplies = {
+      [parentTs]: [
+        makeMessage({ ts: parentTs, user: 'U001', text: 'Parent' }),
+        makeMessage({ ts: '1707580600.000000', thread_ts: parentTs, user: 'U002', text: 'Reply 1' }),
+        makeMessage({ ts: '1707580700.000000', thread_ts: parentTs, user: 'U001', text: 'Reply 2' }),
+      ],
+    };
+    const result = convertMessages(messages, {
+      ...baseOptions,
+      includeThreadReplies: true,
+      threadReplies,
+    });
+    expect(result).toContain('2 replies to Alice Johnson');
+    // Both replies present in the blockquote
+    expect(result).toContain('> Reply 1');
+    expect(result).toContain('> Reply 2');
+  });
+
+  it('omits document header when skipDocumentHeader is true', () => {
+    const messages = [
+      makeMessage({ user: 'U001', text: 'Hello' }),
+    ];
+    const result = convertMessages(messages, {
+      ...baseOptions,
+      skipDocumentHeader: true,
+    });
+    expect(result).not.toContain('# #general');
+    expect(result).not.toContain('Exported from Slack');
+    expect(result).toContain('**Alice Johnson**');
+    expect(result).toContain('Hello');
+  });
+
+  it('includes document header by default', () => {
+    const result = convertMessages([], baseOptions);
+    expect(result).toContain('# #general');
+    expect(result).toContain('Exported from Slack');
   });
 });

@@ -7,9 +7,10 @@ import type {
 } from '../types/messages';
 import type { SlackMessage, RichTextBlock } from '../types/slack-api';
 import { STORAGE_KEYS, API_DELAY_MS } from '../shared/constants';
-import { fetchMessages, fetchChannelInfo, fetchThreadReplies } from './slack-api';
+import { fetchMessages, fetchChannelInfo, fetchThreadReplies, fetchTeamInfo } from './slack-api';
 import { resolveUsers } from './user-cache';
 import { convertMessages } from './markdown/converter';
+import { buildSlackFrontmatter } from './markdown/frontmatter';
 
 chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse) => {
@@ -124,6 +125,8 @@ async function handleFetchMessages(
 
     // 7. Convert to markdown
     sendProgress({ current: 0, phase: 'converting' });
+    const includeFrontmatter = request.includeFrontmatter ?? false;
+
     const markdown = convertMessages(messages, {
       channelName: channelInfo.name,
       userMap,
@@ -131,12 +134,35 @@ async function handleFetchMessages(
       includeFiles: request.includeFiles ?? false,
       includeThreadReplies: request.includeThreads ?? false,
       threadReplies,
+      skipDocumentHeader: includeFrontmatter,
     });
+
+    // 8. Prepend frontmatter if requested
+    let finalMarkdown = markdown;
+    if (includeFrontmatter) {
+      let teamInfo = { name: '', domain: '' };
+      try {
+        teamInfo = await fetchTeamInfo();
+      } catch {
+        // team.info may fail for some workspaces; fall back to empty
+      }
+
+      const frontmatter = buildSlackFrontmatter({
+        channel: channelInfo,
+        workspaceName: teamInfo.name,
+        workspaceDomain: teamInfo.domain,
+        messages,
+        messageCount: messages.length,
+        scope: request.scope,
+      });
+
+      finalMarkdown = frontmatter + '\n\n' + markdown;
+    }
 
     return {
       type: 'FETCH_MESSAGES_RESPONSE',
       success: true,
-      markdown,
+      markdown: finalMarkdown,
       messageCount: messages.length,
     };
   } catch (err) {

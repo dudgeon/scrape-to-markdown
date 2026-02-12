@@ -50,8 +50,10 @@ This extension is distributed as an **unpacked Chrome extension** (not on the Ch
 
 ### Thread Handling
 
-- Optionally expand threaded conversations inline, rendered as blockquotes beneath the parent message
-- Thread replies include their own author and timestamp
+- Optionally expand threaded conversations inline beneath the parent message
+- Threads are rendered as a grouped blockquote with a header showing reply count and a preview of the parent message for disambiguation
+- Each reply includes its own author and timestamp
+- Designed for LLM readability — parent→reply lineage is explicit and unambiguous
 
 ### Output Options
 

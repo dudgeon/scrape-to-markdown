@@ -4,6 +4,21 @@ All notable changes to this extension will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- YAML frontmatter generation with fixed default Slack template (title, source, workspace, channel, dates, message count, tags)
+- Source category auto-detection: `slack-channel`, `slack-private-channel`, `slack-dm`, `slack-group-dm`
+- `team.info` API call for workspace name and domain in frontmatter
+- Frontmatter on/off toggle in popup ("Include YAML frontmatter" checkbox)
+- `engines` field in `package.json` requiring Node >= 20
+
+### Changed
+
+- Thread replies now render as a grouped blockquote with a `**Thread**` header showing reply count, parent author/time, and a truncated parent message preview for disambiguation
+- Removed per-reply `(thread reply)` labels (redundant with the thread header)
+
 ## [0.1.0] — 2026-02-11
 
 ### Added

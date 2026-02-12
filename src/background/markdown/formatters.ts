@@ -13,12 +13,24 @@ export function formatTimestamp(ts: string): { date: string; time: string } {
 export function formatAuthorLine(
   displayName: string,
   time: string,
-  isThreadReply = false,
 ): string {
-  if (isThreadReply) {
-    return `> **${displayName}** \u2014 ${time} (thread reply)`;
-  }
   return `**${displayName}** \u2014 ${time}`;
+}
+
+const THREAD_QUOTE_MAX_LENGTH = 80;
+
+export function formatThreadHeader(
+  replyCount: number,
+  parentAuthor: string,
+  parentTime: string,
+  parentBodyPreview: string,
+): string {
+  const truncated =
+    parentBodyPreview.length > THREAD_QUOTE_MAX_LENGTH
+      ? parentBodyPreview.slice(0, THREAD_QUOTE_MAX_LENGTH) + '\u2026'
+      : parentBodyPreview;
+  const noun = replyCount === 1 ? 'reply' : 'replies';
+  return `> **Thread** (${replyCount} ${noun} to ${parentAuthor} \u2014 ${parentTime}: \u201c${truncated}\u201d):`;
 }
 
 export function formatReactions(reactions: { name: string; count: number }[]): string {

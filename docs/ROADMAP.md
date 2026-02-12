@@ -44,6 +44,7 @@ This is the single source of truth for planned work, priorities, and feature sta
 | 2.4 | File/attachment references | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 2.5 | Download as `.md` file | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 2.6 | Progress indicator | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
+| 2.7 | Thread formatting for LLM readability (header + parent quote + grouped block) | Done | [backlog-thread-formatting.md](backlog-thread-formatting.md) |
 
 ---
 
@@ -53,10 +54,10 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
-| 3.1 | YAML frontmatter generation (fixed default template) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
-| 3.2 | `team.info` API call for workspace name | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
-| 3.3 | Source category auto-detection (channel/DM/group DM/thread) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
-| 3.4 | Frontmatter on/off toggle in popup | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
+| 3.1 | YAML frontmatter generation (fixed default template) | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
+| 3.2 | `team.info` API call for workspace name | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
+| 3.3 | Source category auto-detection (channel/DM/group DM/thread) | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
+| 3.4 | Frontmatter on/off toggle in popup | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 | 3.5 | Template editor UI (settings page) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 | 3.6 | `{{variable\|filter}}` template engine | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 | 3.7 | Participant list for DMs/group DMs (`conversations.members`) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
@@ -101,6 +102,7 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
+| 5.0 | README overhaul (install instructions, features, privacy) | Backlog | [backlog-readme-changelog-versioning.md](backlog-readme-changelog-versioning.md) |
 | 5.1 | DOM fallback mode ("copy visible" for Slack) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.2 | Multiple token extraction strategies (XHR interception, manual paste) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.3 | Side panel UI | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
