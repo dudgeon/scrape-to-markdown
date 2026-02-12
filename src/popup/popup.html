@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Slack Copier</h1>
+
+    <div id="status" class="status">Connecting...</div>
+
+    <div id="controls" class="controls hidden">
+      <div class="field">
+        <span class="label">Channel:</span>
+        <span id="channel-name" class="channel-name">--</span>
+      </div>
+
+      <!-- Scope selector -->
+      <div class="field">
+        <label class="label">Export scope:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="scope" value="last_n" checked> Last N messages</label>
+          <label><input type="radio" name="scope" value="date_range"> Date range</label>
+          <label><input type="radio" name="scope" value="all"> All messages</label>
+        </div>
+      </div>
+
+      <div id="last-n-options" class="field">
+        <label for="message-count">Messages:</label>
+        <select id="message-count">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+          <option value="500">500</option>
+        </select>
+      </div>
+
+      <div id="date-range-options" class="field hidden">
+        <label>From: <input type="date" id="date-from"></label>
+        <label>To: <input type="date" id="date-to"></label>
+      </div>
+
+      <!-- Options -->
+      <div class="field options">
+        <label><input type="checkbox" id="include-threads"> Include thread replies</label>
+        <label><input type="checkbox" id="include-reactions" checked> Include reactions</label>
+        <label><input type="checkbox" id="include-files" checked> Include file references</label>
+      </div>
+
+      <!-- Progress -->
+      <div id="progress" class="progress hidden">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <span id="progress-text" class="progress-text">Fetching...</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button id="copy-btn" class="btn btn-primary">Copy as Markdown</button>
+        <button id="download-btn" class="btn btn-secondary">Download .md</button>
+      </div>
+
+      <div id="result" class="result hidden">
+        <span id="result-message"></span>
+      </div>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+  </div>
+  <script type="module" src="./popup.ts"></script>
+</body>
+</html>
