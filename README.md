@@ -2,6 +2,10 @@
 
 A Chrome extension that scrapes web content — starting with Slack conversations — and converts it to clean markdown. Uses Slack's internal API to capture full message history including threads, reactions, and file references. Future phases add general web page clipping via Readability.js + Turndown.js.
 
+<p align="center">
+  <img src="docs/images/s2md-flow.png" alt="s2md flow: Slack conversations and web content → s2md extension → clean markdown → your AI of choice" width="700">
+</p>
+
 ## Installation
 
 This extension is distributed as an **unpacked Chrome extension** (not on the Chrome Web Store).
@@ -59,8 +63,17 @@ This extension is distributed as an **unpacked Chrome extension** (not on the Ch
 
 - **Reactions** — emoji reaction counts on messages (`:thumbsup: 3 · :heart: 1`)
 - **File references** — attached file names with links
+- **YAML frontmatter** — optional structured metadata block (source, workspace, channel type, dates, message count, tags)
 - **Copy to clipboard** — one-click copy of the full markdown
 - **Download as .md** — saves a file named `#channel-YYYY-MM-DD.md`
+
+### Frontmatter Templates
+
+- Customizable `{{variable|filter}}` template engine for YAML frontmatter fields
+- Built-in templates: Slack Default and Slack Detailed
+- Settings page (gear icon) to create, edit, and manage custom templates
+- Live preview of rendered YAML while editing
+- 8 filters: `date`, `lowercase`, `uppercase`, `default`, `join`, `slug`, `trim`, `truncate`
 
 ### Markdown Conversion
 

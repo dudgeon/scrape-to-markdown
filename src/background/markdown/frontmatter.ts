@@ -1,6 +1,8 @@
 import type { SlackMessage } from '../../types/slack-api';
 import type { ChannelInfo } from '../slack-api';
 import type { MessageScope } from '../../types/messages';
+import type { FrontmatterTemplate } from '../../shared/default-templates';
+import { resolveTemplate, type TemplateContext } from './template-engine';
 
 /** Frontmatter context assembled during export */
 export interface FrontmatterContext {
@@ -108,8 +110,52 @@ export function serializeFrontmatter(data: Record<string, unknown>): string {
 }
 
 /**
+ * Format the export scope for frontmatter display.
+ */
+export function formatExportScope(scope: MessageScope): string {
+  if (scope.mode === 'last_n') return `last_${scope.count}`;
+  if (scope.mode === 'date_range') return 'date_range';
+  return 'all';
+}
+
+/**
+ * Build a flat template context from the Slack export context.
+ * Maps structured data into the variable namespace that templates reference.
+ */
+export function buildSlackTemplateContext(ctx: FrontmatterContext): TemplateContext {
+  return {
+    channel: ctx.channel.name,
+    channel_id: ctx.channel.id,
+    channel_type: deriveChannelType(ctx.channel),
+    topic: ctx.channel.topic ?? '',
+    purpose: ctx.channel.purpose ?? '',
+    workspace: ctx.workspaceName,
+    workspace_domain: ctx.workspaceDomain,
+    source_category: detectSourceCategory(ctx.channel),
+    source_url: buildSourceUrl(ctx.workspaceDomain, ctx.channel.id),
+    captured: new Date(),
+    date_range: computeDateRange(ctx.messages),
+    message_count: ctx.messageCount,
+    export_scope: formatExportScope(ctx.scope),
+  };
+}
+
+/**
+ * Build frontmatter from a user-configured template + export context.
+ * Returns the complete YAML frontmatter string (with --- delimiters).
+ */
+export function buildFrontmatterFromTemplate(
+  template: FrontmatterTemplate,
+  ctx: FrontmatterContext,
+): string {
+  const templateContext = buildSlackTemplateContext(ctx);
+  const resolved = resolveTemplate(template.frontmatter, templateContext);
+  return serializeFrontmatter(resolved);
+}
+
+/**
  * Build the complete YAML frontmatter string for a Slack export
- * using the fixed default template (Phase A).
+ * using the fixed default template (Phase A fallback).
  */
 export function buildSlackFrontmatter(ctx: FrontmatterContext): string {
   const sourceCategory = detectSourceCategory(ctx.channel);

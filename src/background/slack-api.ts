@@ -146,6 +146,8 @@ export interface ChannelInfo {
   is_im: boolean;
   is_mpim: boolean;
   is_private?: boolean;
+  topic?: string;
+  purpose?: string;
 }
 
 export async function fetchChannelInfo(channelId: string): Promise<ChannelInfo> {
@@ -162,6 +164,8 @@ export async function fetchChannelInfo(channelId: string): Promise<ChannelInfo> 
     is_im: ch.is_im,
     is_mpim: ch.is_mpim,
     is_private: ch.is_private,
+    topic: ch.topic?.value || '',
+    purpose: ch.purpose?.value || '',
   };
 }
 

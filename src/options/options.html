@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontmatter Settings</title>
+  <link rel="stylesheet" href="./options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Frontmatter Settings</h1>
+
+    <!-- Template list -->
+    <section id="template-list" class="template-list">
+      <h2>Slack Templates</h2>
+      <div id="slack-templates" class="template-group"></div>
+      <button id="add-slack-template" class="btn btn-small">+ New Slack Template</button>
+    </section>
+
+    <!-- Template editor (hidden until Edit is clicked) -->
+    <section id="editor" class="editor hidden">
+      <h2 id="editor-title">Edit Template</h2>
+
+      <div class="field">
+        <label for="template-name">Template Name</label>
+        <input type="text" id="template-name" placeholder="My Template">
+      </div>
+
+      <div class="field">
+        <label>Frontmatter Fields</label>
+        <div id="fields-container" class="fields-container"></div>
+        <button id="add-field" class="btn btn-small">+ Add Field</button>
+      </div>
+
+      <div class="field">
+        <label>Available Variables</label>
+        <div class="variables-ref">
+          <code>{{channel}}</code> <code>{{channel_id}}</code> <code>{{channel_type}}</code>
+          <code>{{topic}}</code> <code>{{purpose}}</code> <code>{{workspace}}</code>
+          <code>{{workspace_domain}}</code> <code>{{source_category}}</code>
+          <code>{{source_url}}</code> <code>{{captured}}</code> <code>{{date_range}}</code>
+          <code>{{message_count}}</code> <code>{{export_scope}}</code>
+        </div>
+        <div class="variables-ref" style="margin-top: 4px;">
+          <em>Filters:</em>
+          <code>date:"YYYY-MM-DD"</code> <code>lowercase</code> <code>uppercase</code>
+          <code>default:"value"</code> <code>join:", "</code> <code>slug</code>
+          <code>trim</code> <code>truncate:100</code>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Preview</label>
+        <pre id="preview" class="preview">---
+---</pre>
+      </div>
+
+      <div class="editor-actions">
+        <button id="save-btn" class="btn btn-primary">Save</button>
+        <button id="cancel-btn" class="btn btn-secondary">Cancel</button>
+        <button id="delete-btn" class="btn btn-danger">Delete Template</button>
+      </div>
+    </section>
+
+    <!-- Footer actions -->
+    <footer class="footer-actions">
+      <button id="reset-btn" class="btn btn-secondary">Reset to Defaults</button>
+    </footer>
+  </div>
+
+  <script type="module" src="./options.ts"></script>
+</body>
+</html>

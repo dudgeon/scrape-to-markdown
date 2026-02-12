@@ -7,8 +7,12 @@ import {
   yamlEscape,
   serializeFrontmatter,
   buildSlackFrontmatter,
+  buildSlackTemplateContext,
+  buildFrontmatterFromTemplate,
+  formatExportScope,
   type FrontmatterContext,
 } from '../src/background/markdown/frontmatter';
+import type { FrontmatterTemplate } from '../src/shared/default-templates';
 import type { ChannelInfo } from '../src/background/slack-api';
 import type { SlackMessage } from '../src/types/slack-api';
 
@@ -314,5 +318,153 @@ describe('buildSlackFrontmatter', () => {
 
     const result = buildSlackFrontmatter(ctx);
     expect(result).not.toContain('date_range');
+  });
+});
+
+// --- formatExportScope ---
+
+describe('formatExportScope', () => {
+  it('formats last_n scope', () => {
+    expect(formatExportScope({ mode: 'last_n', count: 50 })).toBe('last_50');
+  });
+
+  it('formats date_range scope', () => {
+    expect(formatExportScope({ mode: 'date_range', oldest: 0, latest: 1 })).toBe('date_range');
+  });
+
+  it('formats all scope', () => {
+    expect(formatExportScope({ mode: 'all' })).toBe('all');
+  });
+});
+
+// --- buildSlackTemplateContext ---
+
+describe('buildSlackTemplateContext', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-12T14:30:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('maps FrontmatterContext to flat template context', () => {
+    const ctx: FrontmatterContext = {
+      channel: makeChannel({ topic: 'Team chat', purpose: 'General discussion' }),
+      workspaceName: 'My Workspace',
+      workspaceDomain: 'myworkspace',
+      messages: [makeMessage('1707580500.000000')],
+      messageCount: 1,
+      scope: { mode: 'last_n', count: 50 },
+    };
+
+    const result = buildSlackTemplateContext(ctx);
+
+    expect(result.channel).toBe('general');
+    expect(result.channel_id).toBe('C024BE91L');
+    expect(result.channel_type).toBe('public_channel');
+    expect(result.topic).toBe('Team chat');
+    expect(result.purpose).toBe('General discussion');
+    expect(result.workspace).toBe('My Workspace');
+    expect(result.workspace_domain).toBe('myworkspace');
+    expect(result.source_category).toBe('slack-channel');
+    expect(result.source_url).toBe('https://myworkspace.slack.com/archives/C024BE91L');
+    expect(result.captured).toBeInstanceOf(Date);
+    expect(result.message_count).toBe(1);
+    expect(result.export_scope).toBe('last_50');
+  });
+});
+
+// --- buildFrontmatterFromTemplate ---
+
+describe('buildFrontmatterFromTemplate', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-12T14:30:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const makeCtx = (): FrontmatterContext => ({
+    channel: makeChannel(),
+    workspaceName: 'My Workspace',
+    workspaceDomain: 'myworkspace',
+    messages: [
+      makeMessage('1707580500.000000'),
+      makeMessage('1707666900.000000'),
+    ],
+    messageCount: 2,
+    scope: { mode: 'last_n', count: 50 },
+  });
+
+  it('resolves a simple template to YAML frontmatter', () => {
+    const template: FrontmatterTemplate = {
+      name: 'Test',
+      enabled: true,
+      category: 'slack',
+      frontmatter: {
+        title: '{{channel}}',
+        source: '{{source_category}}',
+        message_count: '{{message_count}}',
+        tags: ['slack'],
+      },
+    };
+
+    const result = buildFrontmatterFromTemplate(template, makeCtx());
+
+    expect(result).toContain('---');
+    expect(result).toContain('title: general');
+    expect(result).toContain('source: slack-channel');
+    expect(result).toContain('message_count: 2');
+    expect(result).toContain('  - slack');
+  });
+
+  it('applies filters in template values', () => {
+    const template: FrontmatterTemplate = {
+      name: 'Test',
+      enabled: true,
+      category: 'slack',
+      frontmatter: {
+        workspace_slug: '{{workspace|lowercase|slug}}',
+      },
+    };
+
+    const result = buildFrontmatterFromTemplate(template, makeCtx());
+    expect(result).toContain('workspace_slug: my-workspace');
+  });
+
+  it('omits empty resolved values', () => {
+    const template: FrontmatterTemplate = {
+      name: 'Test',
+      enabled: true,
+      category: 'slack',
+      frontmatter: {
+        title: '{{channel}}',
+        topic: '{{topic}}',
+      },
+    };
+
+    const result = buildFrontmatterFromTemplate(template, makeCtx());
+    expect(result).toContain('title: general');
+    // topic is empty string on the default makeChannel(), so it should be omitted
+    expect(result).not.toContain('topic');
+  });
+
+  it('resolves array values with template expressions', () => {
+    const template: FrontmatterTemplate = {
+      name: 'Test',
+      enabled: true,
+      category: 'slack',
+      frontmatter: {
+        tags: ['slack', '{{workspace|lowercase|slug}}'],
+      },
+    };
+
+    const result = buildFrontmatterFromTemplate(template, makeCtx());
+    expect(result).toContain('  - slack');
+    expect(result).toContain('  - my-workspace');
   });
 });

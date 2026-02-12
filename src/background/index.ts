@@ -10,7 +10,9 @@ import { STORAGE_KEYS, API_DELAY_MS } from '../shared/constants';
 import { fetchMessages, fetchChannelInfo, fetchThreadReplies, fetchTeamInfo } from './slack-api';
 import { resolveUsers } from './user-cache';
 import { convertMessages } from './markdown/converter';
-import { buildSlackFrontmatter } from './markdown/frontmatter';
+import { buildSlackFrontmatter, buildFrontmatterFromTemplate } from './markdown/frontmatter';
+import type { FrontmatterContext } from './markdown/frontmatter';
+import { getActiveTemplate } from '../shared/template-storage';
 
 chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse) => {
@@ -147,14 +149,26 @@ async function handleFetchMessages(
         // team.info may fail for some workspaces; fall back to empty
       }
 
-      const frontmatter = buildSlackFrontmatter({
+      const fmCtx: FrontmatterContext = {
         channel: channelInfo,
         workspaceName: teamInfo.name,
         workspaceDomain: teamInfo.domain,
         messages,
         messageCount: messages.length,
         scope: request.scope,
-      });
+      };
+
+      let frontmatter: string;
+      try {
+        const activeTemplate = await getActiveTemplate('slack');
+        if (activeTemplate) {
+          frontmatter = buildFrontmatterFromTemplate(activeTemplate, fmCtx);
+        } else {
+          frontmatter = buildSlackFrontmatter(fmCtx);
+        }
+      } catch {
+        frontmatter = buildSlackFrontmatter(fmCtx);
+      }
 
       finalMarkdown = frontmatter + '\n\n' + markdown;
     }

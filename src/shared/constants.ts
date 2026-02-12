@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   CHANNEL_ID: 'current_channel_id',
   WORKSPACE_ID: 'current_workspace_id',
   USER_CACHE: 'user_display_name_cache',
+  TEMPLATES: 'frontmatter_templates',
 } as const;
 
 export const API_DELAY_MS = 1000;

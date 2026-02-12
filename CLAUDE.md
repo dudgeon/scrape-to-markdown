@@ -26,7 +26,8 @@ Three components communicate via `chrome.runtime.sendMessage`:
 
 - **Content Script** (`src/content/`) — Runs on `app.slack.com`. Injects a blob-URL page script to read `window.boot_data.api_token`, stores the `xoxc-` token in `chrome.storage.session`. Polls the URL to detect channel navigation.
 - **Service Worker** (`src/background/`) — Message router that orchestrates: Slack API calls → user name resolution → markdown conversion. Handles `GET_STATUS` and `FETCH_MESSAGES` message types. Sends `PROGRESS` messages back to the popup.
-- **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar.
+- **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar. Gear icon opens the options page.
+- **Options Page** (`src/options/`) — Vanilla HTML/CSS/TS settings page for frontmatter template editing. Template list, key-value field editor, live preview, create/edit/delete custom templates.
 
 ### Key modules
 
@@ -36,7 +37,10 @@ Three components communicate via `chrome.runtime.sendMessage`:
 - `src/background/markdown/mrkdwn.ts` — Regex-based converter for legacy Slack `mrkdwn` format.
 - `src/background/markdown/converter.ts` — Top-level orchestrator: messages[] → full markdown document with date grouping, author lines, thread replies, reactions, files. Supports `skipDocumentHeader` option for frontmatter mode.
 - `src/background/markdown/formatters.ts` — Date/time formatting, author lines, thread headers (with parent quote + reply count), reaction display, file references.
-- `src/background/markdown/frontmatter.ts` — YAML frontmatter generation. Source category detection (`detectSourceCategory`), channel type derivation, YAML serialization (`serializeFrontmatter`), and the top-level `buildSlackFrontmatter()` builder. All pure functions.
+- `src/background/markdown/frontmatter.ts` — YAML frontmatter generation. Source category detection (`detectSourceCategory`), channel type derivation, YAML serialization (`serializeFrontmatter`), and the top-level `buildSlackFrontmatter()` builder (Phase A fallback). `buildFrontmatterFromTemplate()` resolves user-configured templates via the template engine. `buildSlackTemplateContext()` maps export data to the flat variable namespace. All pure functions.
+- `src/background/markdown/template-engine.ts` — `{{variable|filter}}` template engine. Parses expressions, resolves variables from a context, applies filter chains (date, lowercase, uppercase, default, join, slug, trim, truncate). Type-preserving: single-expression values retain their original type. Pure functions, no Chrome deps.
+- `src/shared/default-templates.ts` — `FrontmatterTemplate` and `TemplateStore` types + `DEFAULT_TEMPLATES` constant (Slack Default, Slack Detailed, Web Clip Default).
+- `src/shared/template-storage.ts` — `chrome.storage.sync` wrapper for template CRUD. `loadTemplates()` merges stored with defaults, `getActiveTemplate(category)` finds the enabled template. Pure helper functions (`mergeWithDefaults`, `findActiveTemplate`) exported for testing.
 
 ### Message protocol
 
@@ -54,11 +58,12 @@ Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` or `FETCH_MESSAGES`
 - **API response shapes** (`*Response`) → `src/types/slack-api.ts`
 - **Extension message protocol** → `src/types/messages.ts`
 - **Domain types derived from API data** (e.g., `ChannelInfo`) → the module that produces them (e.g., `slack-api.ts`). Other modules import from there — **do not duplicate type definitions**.
+- **Template types** (`FrontmatterTemplate`, `TemplateStore`) → `src/shared/default-templates.ts`. Template engine types (`TemplateContext`, `TemplateFilter`) → `src/background/markdown/template-engine.ts`.
 - **Module-local types** (e.g., `FrontmatterContext`) → the module that uses them, exported for test access.
 
 ## Testing
 
-Tests live in `tests/` and cover the pure-function modules. Chrome API interactions are tested manually by loading the extension. Test files mirror source modules: `converter.test.ts`, `rich-text.test.ts`, `mrkdwn.test.ts`, `frontmatter.test.ts`. Use factory helpers (e.g., `makeMessage()`, `makeChannel()`) for test data — check existing test files for patterns before creating new ones.
+Tests live in `tests/` and cover the pure-function modules. Chrome API interactions are tested manually by loading the extension. Test files mirror source modules: `converter.test.ts`, `rich-text.test.ts`, `mrkdwn.test.ts`, `frontmatter.test.ts`, `template-engine.test.ts`, `template-storage.test.ts`. Use factory helpers (e.g., `makeMessage()`, `makeChannel()`) for test data — check existing test files for patterns before creating new ones.
 
 ## Build Versioning
 

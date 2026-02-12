@@ -1,6 +1,6 @@
 # Backlog: Configurable Clipboard Frontmatter
 
-**Status**: Backlog (not yet scheduled)
+**Status**: Phase A + B Done; Phase C (participants, web variables) is Backlog
 **Depends on**: Phase 1 MVP of Slack Conversation Copier; pairs naturally with the web clipping feature
 **Effort estimate**: Medium (template engine, settings UI, metadata extraction across both modes)
 

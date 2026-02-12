@@ -141,6 +141,17 @@ input[type="date"] {
   padding: 2px 0;
 }
 
+.settings-link {
+  color: #8888aa;
+  text-decoration: none;
+  margin-left: 2px;
+  font-size: 14px;
+}
+
+.settings-link:hover {
+  color: #e1e1e1;
+}
+
 /* Progress */
 .progress {
   display: flex;

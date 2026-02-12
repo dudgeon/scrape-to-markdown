@@ -26,6 +26,12 @@ const includeThreads = document.getElementById('include-threads') as HTMLInputEl
 const includeReactions = document.getElementById('include-reactions') as HTMLInputElement;
 const includeFiles = document.getElementById('include-files') as HTMLInputElement;
 const includeFrontmatter = document.getElementById('include-frontmatter') as HTMLInputElement;
+const settingsLink = document.getElementById('frontmatter-settings');
+
+settingsLink?.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.runtime.openOptionsPage();
+});
 
 declare const __BUILD_VERSION__: string;
 
