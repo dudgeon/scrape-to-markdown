@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Slack Conversation Copier",
+  "name": "scrape-to-markdown (s2md)",
   "version": "0.1.0",
   "description": "Copy Slack conversations as clean markdown",
   "permissions": [
@@ -11,7 +11,6 @@
   ],
   "host_permissions": [
     "https://app.slack.com/*",
-    "https://*.slack.com/*",
     "https://slack.com/api/*"
   ],
   "content_scripts": [
