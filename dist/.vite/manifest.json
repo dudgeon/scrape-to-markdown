@@ -32,12 +32,12 @@
     ]
   },
   "src/popup/popup.html": {
-    "file": "assets/popup.html-BvsYZ7qu.js",
+    "file": "assets/popup.html-DQ5eP1zE.js",
     "name": "popup.html",
     "src": "src/popup/popup.html",
     "isEntry": true,
     "css": [
-      "assets/popup-CE907nSS.css"
+      "assets/popup-CWgaTzEv.css"
     ]
   }
 }

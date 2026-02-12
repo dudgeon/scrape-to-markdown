@@ -208,3 +208,11 @@ input[type="date"] {
 .btn-secondary:hover:not(:disabled) {
   background: #3a3a52;
 }
+
+/* Version footer */
+.version {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 10px;
+  color: #555577;
+}

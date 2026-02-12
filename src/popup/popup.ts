@@ -26,9 +26,15 @@ const includeThreads = document.getElementById('include-threads') as HTMLInputEl
 const includeReactions = document.getElementById('include-reactions') as HTMLInputElement;
 const includeFiles = document.getElementById('include-files') as HTMLInputElement;
 
+declare const __BUILD_VERSION__: string;
+
 let currentChannelId: string | null = null;
 let currentChannelName: string | null = null;
 let lastMarkdown: string | null = null;
+
+// Display build version
+const versionEl = document.querySelector('.version');
+if (versionEl) versionEl.textContent = `v${__BUILD_VERSION__}`;
 
 // Scope radio buttons
 const scopeRadios = document.querySelectorAll<HTMLInputElement>('input[name="scope"]');

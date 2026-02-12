@@ -51,6 +51,18 @@ Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` or `FETCH_MESSAGES`
 
 Tests live in `tests/` and cover the pure-function markdown conversion modules (42 tests across 3 files). Chrome API interactions are tested manually by loading the extension.
 
+## Build Versioning
+
+`package.json` version is the source of truth. `vite.config.ts` injects it as `__BUILD_VERSION__` at compile time. The popup footer displays it. When bumping version: update `package.json`, `src/manifest.json`, and add a `CHANGELOG.md` entry.
+
+## Gotchas
+
+- **Node >= 20 required.** Vite 5, CRXJS, and Vitest all depend on packages that need Node 20+. The `.nvmrc` is set to `20`. Run `nvm use` before any npm commands.
+- **CRXJS does not handle page-world scripts.** The injected script that reads `window.boot_data` must run in the page context (not the extension isolated world). CRXJS can't bundle this as a separate entry. Solution: inline the code as a string in `src/content/token-extractor.ts` and inject via blob URL. Do NOT try to use `chrome.runtime.getURL()` with a separate `.ts` file — CRXJS won't include it in `web_accessible_resources`.
+- **`chrome.storage.get()` returns `Record<string, {}>`.** With `strict: true`, values need explicit `as` casts (e.g., `result[KEY] as string | undefined`). Same applies to `chrome.cookies.get()`.
+- **`@crxjs/vite-plugin@beta`** is used because the stable 2.0.0 release was not available at build time. The beta works with Vite 5 but is marked deprecated. Monitor for a stable release.
+- **`__BUILD_VERSION__`** is a Vite `define` constant. Any TS file using it must include `declare const __BUILD_VERSION__: string;` for the type checker.
+
 ## Roadmap & Backlog
 
 The roadmap lives at `docs/ROADMAP.md`. It is the single source of truth for planned work, priorities, and feature status.
