@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "scrape-to-markdown (s2md)",
   "version": "0.1.0",
-  "description": "Copy Slack conversations as clean markdown",
+  "description": "Clip any web page or Slack conversation as clean markdown — copy to clipboard or download as .md",
   "permissions": [
     "activeTab",
     "clipboardWrite",
