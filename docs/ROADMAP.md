@@ -103,9 +103,9 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
-| P.A | Interface extraction + extension adapters (refactor, no behavior change) | Done | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
-| P.B | Core orchestrator extraction (`export-slack.ts`) | Done | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
-| P.C | Userscript adapters + floating panel UI + build config | Done | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+| P.A | Interface extraction + extension adapters (refactor, no behavior change) | Done | [backlog-platform-abstraction-userscript.md](archive/backlog-platform-abstraction-userscript.md) |
+| P.B | Core orchestrator extraction (`export-slack.ts`) | Done | [backlog-platform-abstraction-userscript.md](archive/backlog-platform-abstraction-userscript.md) |
+| P.C | Userscript adapters + floating panel UI + build config | Done | [backlog-platform-abstraction-userscript.md](archive/backlog-platform-abstraction-userscript.md) |
 
 ---
 
