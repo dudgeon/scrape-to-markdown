@@ -68,6 +68,32 @@
       </div>
     </div>
 
+    <!-- Web clip mode (non-Slack pages) -->
+    <div id="clip-controls" class="controls hidden">
+      <div class="field">
+        <span class="label">Page:</span>
+        <span id="clip-page-title" class="page-title">--</span>
+      </div>
+
+      <div class="field options">
+        <label><input type="checkbox" id="clip-include-frontmatter"> Include YAML frontmatter <a href="#" id="clip-frontmatter-settings" class="settings-link" title="Frontmatter settings">&#9881;</a></label>
+      </div>
+
+      <div id="clip-progress" class="progress hidden">
+        <div class="progress-bar"><div id="clip-progress-fill" class="progress-fill"></div></div>
+        <span id="clip-progress-text" class="progress-text">Extracting...</span>
+      </div>
+
+      <div class="actions">
+        <button id="clip-copy-btn" class="btn btn-primary">Clip as Markdown</button>
+        <button id="clip-download-btn" class="btn btn-secondary">Download .md</button>
+      </div>
+
+      <div id="clip-result" class="result hidden">
+        <span id="clip-result-message"></span>
+      </div>
+    </div>
+
     <div id="error" class="error hidden"></div>
 
     <footer class="version"></footer>

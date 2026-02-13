@@ -44,7 +44,7 @@ This is the single source of truth for planned work, priorities, and feature sta
 | 2.4 | File/attachment references | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 2.5 | Download as `.md` file | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 2.6 | Progress indicator | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
-| 2.7 | Thread formatting for LLM readability (header + parent quote + grouped block) | Done | [backlog-thread-formatting.md](backlog-thread-formatting.md) |
+| 2.7 | Thread formatting for LLM readability (header + parent quote + grouped block) | Done | [backlog-thread-formatting.md](archive/backlog-thread-formatting.md) |
 
 ---
 
@@ -67,18 +67,16 @@ This is the single source of truth for planned work, priorities, and feature sta
 ## Phase 4: General Web Clipping
 
 > Extends the extension to clip any web page as markdown. Depends on the frontmatter system (Phase 3) for metadata on web clips.
->
-> **Note:** Web clipping has not been implemented or tested yet. The popup currently has no non-Slack mode — on non-Slack tabs it shows stale Slack channel data (see [5.0a](backlog-tab-aware-channel-detection.md)). Tab-aware detection (5.0a) is a prerequisite for 4.3.
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
-| 4.1 | Bundle Readability.js + Turndown.js + GFM plugin | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 4.2 | On-demand content script injection (`chrome.scripting.executeScript`) | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 4.3 | Popup: auto-detect Slack vs. non-Slack, switch UI mode | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 4.4 | Article extraction → markdown → clipboard | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 4.5 | Web clip frontmatter (title, author, source_url, captured) | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 4.6 | Clip user selection as markdown | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 4.7 | Custom Turndown rules (images, videos, figures, tables) | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.1 | Bundle Readability.js + Turndown.js + GFM plugin | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.2 | On-demand content script injection (`chrome.scripting.executeScript`) | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.3 | Popup: auto-detect Slack vs. non-Slack, switch UI mode | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.4 | Article extraction → markdown → clipboard | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.5 | Web clip frontmatter (title, author, source_url, captured) | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.6 | Clip user selection as markdown | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 4.7 | Custom Turndown rules (images, videos, figures, tables) | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
 
 ---
 
@@ -115,8 +113,8 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
-| 5.0a | **Bug:** Popup has no tab awareness — shows stale Slack channel regardless of active tab | Backlog | [backlog-tab-aware-channel-detection.md](backlog-tab-aware-channel-detection.md) |
-| 5.0 | README overhaul (install instructions, features, privacy) | Backlog | [backlog-readme-changelog-versioning.md](backlog-readme-changelog-versioning.md) |
+| 5.0a | **Bug:** Popup has no tab awareness — shows stale Slack channel regardless of active tab | Done | [backlog-tab-aware-channel-detection.md](archive/backlog-tab-aware-channel-detection.md) |
+| 5.0 | README overhaul (install instructions, features, privacy) | Done | [backlog-readme-changelog-versioning.md](archive/backlog-readme-changelog-versioning.md) |
 | 5.1 | DOM fallback mode ("copy visible" for Slack) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.2 | ~~Multiple token extraction strategies~~ — solved by `chrome.webRequest` | Done | — |
 | 5.3 | Side panel UI | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |

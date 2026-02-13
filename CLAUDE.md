@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) and Tampermonkey userscript that scrapes web content and converts it to clean markdown. Currently implements Slack conversation capture via the internal `xoxc-` session token and `conversations.history` API, with configurable YAML frontmatter and a `{{variable|filter}}` template engine. Future phases add general web page clipping (Readability.js + Turndown.js).
+**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) and Tampermonkey userscript that scrapes web content and converts it to clean markdown. Two modes: **Slack conversation capture** (via `xoxc-` session token and `conversations.history` API, with threads, reactions, and configurable YAML frontmatter) and **web page clipping** (via Readability.js + Turndown.js, with article extraction, selection clipping, and frontmatter). The popup auto-detects which mode to use based on the active tab URL.
 
 The extension is submitted to the Chrome Web Store (pending review). The userscript (`s2md.user.js`) is an alternative distribution for environments where unpacked extensions are disabled — install via Tampermonkey from the GitHub raw URL.
 
@@ -42,7 +42,7 @@ Four components communicate via `chrome.runtime.sendMessage`:
 
 - **Content Script** (`src/content/`) — Runs on `app.slack.com`. Wakes the service worker (which captures the `xoxc-` token passively via `chrome.webRequest`). Polls the URL to detect channel navigation and stores the channel/workspace IDs in `chrome.storage.session`.
 - **Service Worker** (`src/background/`) — Captures the `xoxc-` token passively via `chrome.webRequest` listeners on Slack API traffic (Authorization header and POST body). Routes messages: delegates to `exportSlackChannel()` for `FETCH_MESSAGES`, handles `GET_STATUS` and `CHANNEL_DETECTED` directly. Sends `PROGRESS` messages back to the popup.
-- **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar. Gear icon opens the options page.
+- **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Auto-detects Slack vs. non-Slack tabs via `chrome.tabs.query()`. **Slack mode**: scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar. **Web clip mode**: article extraction via `chrome.scripting.executeScript()` + Readability.js + Turndown.js, selection clipping, frontmatter toggle, copy/download. Gear icon opens the options page.
 - **Options Page** (`src/options/`) — Vanilla HTML/CSS/TS settings page for frontmatter template editing. Template list, key-value field editor, live preview, create/edit/delete custom templates.
 
 ### Tampermonkey Userscript
@@ -60,17 +60,28 @@ Single-file IIFE (`s2md.user.js`) built by `vite.userscript.config.ts`. Runs dir
 - `src/background/markdown/mrkdwn.ts` — Regex-based converter for legacy Slack `mrkdwn` format.
 - `src/background/markdown/converter.ts` — Top-level orchestrator: messages[] → full markdown document with date grouping, author lines, thread replies, reactions, files. Supports `skipDocumentHeader` option for frontmatter mode.
 - `src/background/markdown/formatters.ts` — Date/time formatting, author lines, thread headers (with parent quote + reply count), reaction display, file references.
-- `src/background/markdown/frontmatter.ts` — YAML frontmatter generation. Source category detection (`detectSourceCategory`), channel type derivation, YAML serialization (`serializeFrontmatter`), and the top-level `buildSlackFrontmatter()` builder (Phase A fallback). `buildFrontmatterFromTemplate()` resolves user-configured templates via the template engine. `buildSlackTemplateContext()` maps export data to the flat variable namespace. All pure functions.
+- `src/background/markdown/frontmatter.ts` — YAML frontmatter generation. Source category detection (`detectSourceCategory`), channel type derivation, YAML serialization (`serializeFrontmatter`), and the top-level `buildSlackFrontmatter()` builder (Phase A fallback). `buildFrontmatterFromTemplate()` resolves user-configured Slack templates via the template engine. `buildSlackTemplateContext()` maps Slack export data to the flat variable namespace. `buildWebClipTemplateContext()` and `buildWebClipFrontmatterFromTemplate()` do the same for web clips. All pure functions.
 - `src/background/markdown/template-engine.ts` — `{{variable|filter}}` template engine. Parses expressions, resolves variables from a context, applies filter chains (date, lowercase, uppercase, default, join, slug, trim, truncate). Type-preserving: single-expression values retain their original type. Pure functions, no Chrome deps.
 - `src/shared/default-templates.ts` — `FrontmatterTemplate` and `TemplateStore` types + `DEFAULT_TEMPLATES` constant (Slack Default, Slack Detailed, Web Clip Default).
 - `src/shared/template-storage.ts` — Storage-backed template CRUD. Uses injected `StorageAdapter` (call `initTemplateStorage()` first). `loadTemplates()` merges stored with defaults, `getActiveTemplate(category)` finds the enabled template. Pure helper functions (`mergeWithDefaults`, `findActiveTemplate`) exported for testing.
 - `src/core/export-slack.ts` — Platform-agnostic export orchestrator. `exportSlackChannel(options)` runs the full pipeline: fetch messages → resolve users → convert to markdown → generate frontmatter. Progress via `onProgress` callback.
+- `src/core/clip-page.ts` — Web page clipping. `clipPage(data)` takes raw HTML + URL, runs Readability.js for article extraction, converts to markdown via Turndown.js with GFM plugin and custom rules (figures, video, iframe). Returns `ClipResult` with markdown, title, byline, siteName, excerpt. Supports selection clipping (skips Readability when `selectedHtml` is provided). Pure function — runs in any context with DOM API.
+- `src/shared/url-parser.ts` — Pure URL parsing utilities. `parseSlackUrl(url)` extracts workspaceId/channelId from Slack URLs. `isSlackUrl(url)` checks if a URL is on `app.slack.com`. Used by both the popup (for tab detection) and the content script (for channel detection).
 
 ### Message protocol
 
-Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` or `FETCH_MESSAGES` to service worker, gets back `StatusResponse` or `FetchMessagesResponse`. Content script sends `EXTRACT_TOKEN` (wake service worker) and `CHANNEL_DETECTED` (channel navigation). Service worker sends `PROGRESS` updates during long operations.
+Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` (with optional `channelId`/`workspaceId` from active tab) or `FETCH_MESSAGES` to service worker, gets back `StatusResponse` or `FetchMessagesResponse`. Content script sends `EXTRACT_TOKEN` (wake service worker) and `CHANNEL_DETECTED` (channel navigation). Service worker sends `PROGRESS` updates during long operations. Web clipping does not use the message protocol — the popup handles extraction directly via `chrome.scripting.executeScript()`.
 
 **Every message type in the union must have a matching `case` in the service worker's switch statement.** Silent drops are hard to debug — grep for `case '` in `index.ts` to verify coverage.
+
+## Design Rules
+
+These rules encode lessons from past implementation work. Follow them when adding new features.
+
+1. **Popup has DOM APIs — use them.** The popup runs in a browser context with `DOMParser`, `document.createElement`, etc. When you need to process HTML (Readability, Turndown, DOM manipulation), do it in the popup — don't inject a bundled content script just for processing.
+2. **`chrome.scripting.executeScript({ func })` for data extraction only.** Inject a minimal inline function that returns raw data (HTML string, selection text, URL, title). Do heavy processing in the caller (popup or service worker). This avoids separate bundle entry points, CRXJS config, and message-passing complexity.
+3. **Shared utils accept primitives, not browser globals.** When extracting code from browser-context modules to `src/shared/`, make the shared version accept `string`/`object` params — never `window.*`, `document.*`, or `chrome.*`. The browser-context caller wraps the shared function with the appropriate global access (see `src/shared/url-parser.ts` as the canonical example).
+4. **When spec and implementation diverge, document why.** If you choose a simpler approach than what the spec describes, note the divergence in the retro and update the spec or mark it as superseded. Future readers should not be misled by outdated architecture diagrams.
 
 ## Type system
 
@@ -109,14 +120,15 @@ When debugging runtime issues (token extraction, channel detection, API calls):
 ## Gotchas
 
 - **Node >= 20 required.** Vite 5, CRXJS, and Vitest all depend on packages that need Node 20+. The `.nvmrc` is set to `20`. Run `nvm use` before any npm commands.
-- **Token extraction uses `chrome.webRequest`, not page-world injection.** Slack client-v2 no longer exposes `window.boot_data`. The service worker passively captures the `xoxc-` token from Slack's own HTTP requests (Authorization header or POST body `token=` field). No blob URLs, no `chrome.scripting.executeScript`, no CSP concerns.
+- **Token extraction uses `chrome.webRequest`, not page-world injection.** Slack client-v2 no longer exposes `window.boot_data`. The service worker passively captures the `xoxc-` token from Slack's own HTTP requests (Authorization header or POST body `token=` field). No blob URLs, no CSP concerns.
+- **Web clipping uses `chrome.scripting.executeScript` from the popup.** The popup injects an inline function into the active tab to grab `document.documentElement.outerHTML`, then processes it locally with Readability + Turndown. No separate bundled content script needed — the injected function returns raw HTML and the popup has full DOM API for processing.
 - **`chrome.storage.session` requires `setAccessLevel` for content script access.** MV3 restricts session storage to the service worker by default. The service worker calls `chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' })` at startup so the content script can also read/write session storage.
 - **`chrome.storage.get()` returns `Record<string, {}>`.** With `strict: true`, values need explicit `as` casts (e.g., `result[KEY] as string | undefined`). Same applies to `chrome.cookies.get()`.
 - **`@crxjs/vite-plugin@beta`** is used because the stable 2.0.0 release was not available at build time. The beta works with Vite 5 but is marked deprecated. Monitor for a stable release.
 - **`__BUILD_VERSION__`** is a Vite `define` constant. Any TS file using it must include `declare const __BUILD_VERSION__: string;` for the type checker.
 - **Userscript build outputs to repo root.** `vite.userscript.config.ts` writes `s2md.user.js` to `.` (not `dist/`). Vite warns about `build.outDir must not be the same directory of root` — this is expected and harmless.
 - **`tsconfig.userscript.json` uses `"types": []`** to exclude `@types/chrome`. This prevents accidental Chrome API usage in userscript code paths. If a module needs Chrome APIs, it shouldn't be in the userscript include list.
-- **Platform modules require initialization.** `slack-api.ts`, `user-cache.ts`, and `template-storage.ts` use module-level `_auth`/`_http`/`_storage` vars set by `init*()` functions. Both entry points (`src/background/index.ts` and `src/userscript/index.ts`) must call these before any API/storage use.
+- **Platform modules require initialization.** `slack-api.ts`, `user-cache.ts`, and `template-storage.ts` use module-level `_auth`/`_http`/`_storage` vars set by `init*()` functions. The service worker (`src/background/index.ts`), userscript (`src/userscript/index.ts`), and popup (`src/popup/popup.ts` — for template storage only) must call these before any API/storage use.
 
 ## Roadmap & Backlog
 
@@ -141,6 +153,8 @@ The roadmap lives at `docs/ROADMAP.md`. It is the single source of truth for pla
 ### Spec-before-code rule
 
 **Always write the spec and update the roadmap before touching source files** — even for changes that feel small. Output format changes, markdown structure tweaks, and anything affecting LLM-consumed output are design decisions that deserve a written rationale. The spec doesn't need to be long, but it must exist before the first edit to `src/`.
+
+**If the implementation diverges from the spec** (e.g., popup-local processing instead of the spec's content-script injection), that's fine — simpler is better. But document the divergence in the retro and update or supersede the spec so future readers aren't misled.
 
 ### When implementing a feature
 

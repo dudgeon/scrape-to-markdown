@@ -27,6 +27,8 @@ export interface FetchMessagesRequest {
 
 export interface GetStatusRequest {
   type: 'GET_STATUS';
+  channelId?: string;
+  workspaceId?: string;
 }
 
 // Service Worker -> Popup (responses)

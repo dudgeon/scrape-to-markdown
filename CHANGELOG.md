@@ -6,19 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- **Web clipping** — clip any web page as clean markdown (Readability.js + Turndown.js)
+  - Popup auto-detects Slack vs. non-Slack tabs and switches UI mode
+  - Article extraction with Readability.js, GFM table support via Turndown plugin
+  - Clip user-selected text as markdown (when text is selected before clicking)
+  - Custom Turndown rules for `<figure>` with captions, `<video>` elements, and `<iframe>` embeds
+  - Optional YAML frontmatter with title, author, source URL, and capture date
+  - Copy to clipboard and download as `.md` file
+- Shared URL parser (`src/shared/url-parser.ts`) for Slack URL detection across popup and content script
+
 ### Fixed
 
+- **Tab awareness**: popup now queries the active tab URL directly via `chrome.tabs.query()` instead of reading from global session storage — no more stale channel data on non-Slack tabs or when multiple Slack tabs are open
 - Token extraction: replaced blob URL page injection with passive `chrome.webRequest` listeners — fixes Slack CSP blocking and compatibility with Slack client-v2 which no longer exposes `window.boot_data` (#1)
 - Channel detection: added `CHANNEL_DETECTED` message handler in service worker and `chrome.storage.session.setAccessLevel()` call — content scripts can now write to session storage (MV3 restriction)
 
-### Added
+### Added (Phase 3)
 
 - YAML frontmatter generation with fixed default Slack template (title, source, workspace, channel, dates, message count, tags)
 - Source category auto-detection: `slack-channel`, `slack-private-channel`, `slack-dm`, `slack-group-dm`
 - `team.info` API call for workspace name and domain in frontmatter
 - Frontmatter on/off toggle in popup ("Include YAML frontmatter" checkbox)
 - `{{variable|filter}}` template engine for customizable frontmatter fields
-- Built-in templates: Slack Default and Slack Detailed
+- Built-in templates: Slack Default, Slack Detailed, and Web Clip Default
 - Options/settings page (gear icon) for creating, editing, and managing custom frontmatter templates
 - Live YAML preview in template editor
 - 8 template filters: `date`, `lowercase`, `uppercase`, `default`, `join`, `slug`, `trim`, `truncate`
@@ -29,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Thread replies now render as a grouped blockquote with a `**Thread**` header showing reply count, parent author/time, and a truncated parent message preview for disambiguation
 - Removed per-reply `(thread reply)` labels (redundant with the thread header)
+- Manifest now includes `scripting` permission for on-demand content script injection (web clipping)
 
 ## [0.1.0] — 2026-02-11
 

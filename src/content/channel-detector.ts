@@ -1,17 +1,10 @@
 import { STORAGE_KEYS } from '../shared/constants';
+import { parseSlackUrl } from '../shared/url-parser';
 
-export interface ChannelInfo {
-  workspaceId: string;
-  channelId: string;
-}
+export type { SlackIds as ChannelInfo } from '../shared/url-parser';
 
-export function detectChannel(): ChannelInfo | null {
-  // URL format: https://app.slack.com/client/{workspaceId}/{channelId}
-  const match = window.location.pathname.match(
-    /\/client\/([A-Z0-9]+)\/([A-Z0-9]+)/i,
-  );
-  if (!match) return null;
-  return { workspaceId: match[1], channelId: match[2] };
+export function detectChannel() {
+  return parseSlackUrl(window.location.href);
 }
 
 export function startChannelDetection(): void {

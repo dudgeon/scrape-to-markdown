@@ -1,0 +1,1 @@
+function r(t){try{const{hostname:a,pathname:c}=new URL(t);if(a!=="app.slack.com")return null;const n=c.match(/\/client\/([A-Z0-9]+)\/([A-Z0-9]+)/i);return n?{workspaceId:n[1],channelId:n[2]}:null}catch{return null}}export{r as p};

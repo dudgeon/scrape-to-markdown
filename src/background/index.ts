@@ -2,6 +2,7 @@ import type {
   ExtensionMessage,
   FetchMessagesRequest,
   FetchMessagesResponse,
+  GetStatusRequest,
   StatusResponse,
 } from '../types/messages';
 import { STORAGE_KEYS } from '../shared/constants';
@@ -98,7 +99,7 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
       });
       return;
     case 'GET_STATUS':
-      return handleGetStatus();
+      return handleGetStatus(message);
     case 'FETCH_MESSAGES':
       return handleFetchMessages(message);
     default:
@@ -106,26 +107,30 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   }
 }
 
-async function handleGetStatus(): Promise<StatusResponse> {
+async function handleGetStatus(request: GetStatusRequest): Promise<StatusResponse> {
   const data = await chrome.storage.session.get([
     STORAGE_KEYS.TOKEN,
     STORAGE_KEYS.CHANNEL_ID,
   ]);
 
   const hasToken = !!data[STORAGE_KEYS.TOKEN];
-  const channelId = (data[STORAGE_KEYS.CHANNEL_ID] as string | undefined) || undefined;
+
+  // Prefer popup-provided IDs (derived from active tab) over global session storage
+  const channelId = request.channelId
+    || (data[STORAGE_KEYS.CHANNEL_ID] as string | undefined)
+    || undefined;
 
   let channelName: string | undefined;
   if (hasToken && channelId) {
     try {
-      const info = await fetchChannelInfo(channelId as string);
+      const info = await fetchChannelInfo(channelId);
       channelName = info.name;
     } catch {
       // Channel info fetch failed, ok
     }
   }
 
-  return { type: 'STATUS_RESPONSE', hasToken, channelId: channelId as string | undefined, channelName };
+  return { type: 'STATUS_RESPONSE', hasToken, channelId, channelName };
 }
 
 async function handleFetchMessages(

@@ -1,9 +1,22 @@
 import type {
   StatusResponse,
   FetchMessagesResponse,
+  GetStatusRequest,
   MessageScope,
   ProgressMessage,
 } from '../types/messages';
+import { parseSlackUrl } from '../shared/url-parser';
+import { clipPage } from '../core/clip-page';
+import {
+  buildWebClipFrontmatterFromTemplate,
+  serializeFrontmatter,
+  type WebClipFrontmatterContext,
+} from '../background/markdown/frontmatter';
+import { getActiveTemplate, initTemplateStorage } from '../shared/template-storage';
+import { ExtensionSyncStorage } from '../adapters/extension/storage';
+
+// Init template storage so the popup can read templates for web clip frontmatter
+initTemplateStorage(new ExtensionSyncStorage());
 
 // Elements
 const statusEl = document.getElementById('status')!;
@@ -33,11 +46,32 @@ settingsLink?.addEventListener('click', (e) => {
   chrome.runtime.openOptionsPage();
 });
 
+// Web clip elements
+const clipControlsEl = document.getElementById('clip-controls')!;
+const clipPageTitle = document.getElementById('clip-page-title')!;
+const clipIncludeFrontmatter = document.getElementById('clip-include-frontmatter') as HTMLInputElement;
+const clipCopyBtn = document.getElementById('clip-copy-btn') as HTMLButtonElement;
+const clipDownloadBtn = document.getElementById('clip-download-btn') as HTMLButtonElement;
+const clipResultEl = document.getElementById('clip-result')!;
+const clipResultMessage = document.getElementById('clip-result-message')!;
+const clipProgressEl = document.getElementById('clip-progress')!;
+const clipProgressFill = document.getElementById('clip-progress-fill')!;
+const clipProgressText = document.getElementById('clip-progress-text')!;
+const clipSettingsLink = document.getElementById('clip-frontmatter-settings');
+
+clipSettingsLink?.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.runtime.openOptionsPage();
+});
+
 declare const __BUILD_VERSION__: string;
 
 let currentChannelId: string | null = null;
 let currentChannelName: string | null = null;
 let lastMarkdown: string | null = null;
+let activeTabId: number | null = null;
+let activeTabUrl: string = '';
+let activeTabTitle: string = '';
 
 // Display build version
 const versionEl = document.querySelector('.version');
@@ -167,6 +201,135 @@ downloadBtn.addEventListener('click', async () => {
   resultMessageEl.textContent += ' — downloaded!';
 });
 
+// --- Web clip handlers ---
+
+async function clipCurrentPage(): Promise<string | null> {
+  if (!activeTabId) return null;
+
+  clipResultEl.classList.add('hidden');
+  errorEl.classList.add('hidden');
+  clipProgressEl.classList.remove('hidden');
+  clipProgressFill.style.width = '50%';
+  clipProgressText.textContent = 'Extracting article...';
+  clipCopyBtn.disabled = true;
+  clipDownloadBtn.disabled = true;
+
+  try {
+    // Inject a function to grab the page HTML + selection
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId: activeTabId },
+      func: () => {
+        let selectedHtml: string | undefined;
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+          const container = document.createElement('div');
+          container.appendChild(sel.getRangeAt(0).cloneContents());
+          selectedHtml = container.innerHTML;
+        }
+        return {
+          html: document.documentElement.outerHTML,
+          url: location.href,
+          title: document.title,
+          selectedHtml,
+        };
+      },
+    });
+
+    if (!result?.result) {
+      showError('Could not read page content.');
+      return null;
+    }
+
+    clipProgressFill.style.width = '80%';
+    clipProgressText.textContent = 'Converting to markdown...';
+
+    const clip = clipPage(result.result);
+    let markdown = clip.markdown;
+
+    // Prepend YAML frontmatter if enabled
+    if (clipIncludeFrontmatter.checked) {
+      const fmCtx: WebClipFrontmatterContext = {
+        title: clip.title,
+        sourceUrl: activeTabUrl,
+        author: clip.byline,
+        siteName: clip.siteName,
+        excerpt: clip.excerpt,
+      };
+
+      let frontmatter: string;
+      try {
+        const template = await getActiveTemplate('web');
+        if (template) {
+          frontmatter = buildWebClipFrontmatterFromTemplate(template, fmCtx);
+        } else {
+          frontmatter = serializeFrontmatter({
+            title: clip.title,
+            source: 'web-clip',
+            source_url: activeTabUrl,
+            author: clip.byline || '',
+            captured: new Date().toISOString(),
+            tags: ['web-clip'],
+          });
+        }
+      } catch {
+        frontmatter = serializeFrontmatter({
+          title: clip.title,
+          source: 'web-clip',
+          source_url: activeTabUrl,
+          captured: new Date().toISOString(),
+          tags: ['web-clip'],
+        });
+      }
+
+      markdown = frontmatter + '\n\n' + markdown;
+    }
+
+    lastMarkdown = markdown;
+    activeTabTitle = clip.title || activeTabTitle;
+    clipResultMessage.textContent = result.result.selectedHtml
+      ? 'Clipped selection'
+      : 'Clipped article';
+    clipResultEl.classList.remove('hidden');
+    return markdown;
+  } catch (err) {
+    showError(err instanceof Error ? err.message : 'Clip failed');
+    return null;
+  } finally {
+    clipProgressEl.classList.add('hidden');
+    clipCopyBtn.disabled = false;
+    clipDownloadBtn.disabled = false;
+  }
+}
+
+clipCopyBtn.addEventListener('click', async () => {
+  const markdown = await clipCurrentPage();
+  if (markdown) {
+    await navigator.clipboard.writeText(markdown);
+    clipResultMessage.textContent += ' — copied to clipboard!';
+  }
+});
+
+clipDownloadBtn.addEventListener('click', async () => {
+  const markdown = await clipCurrentPage();
+  if (!markdown) return;
+
+  const slug = activeTabTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60);
+  const filename = `${slug || 'clip'}-${new Date().toISOString().split('T')[0]}.md`;
+
+  const blob = new Blob([markdown], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  clipResultMessage.textContent += ' — downloaded!';
+});
+
 function showError(message: string) {
   errorEl.textContent = message;
   errorEl.classList.remove('hidden');
@@ -175,9 +338,30 @@ function showError(message: string) {
 // Initialize
 async function init() {
   try {
-    const status: StatusResponse = await chrome.runtime.sendMessage({
+    // Query the active tab to determine context (Slack channel or other page)
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const activeUrl = tab?.url || '';
+    const slackIds = parseSlackUrl(activeUrl);
+
+    // Build status request with active-tab IDs (avoids stale global storage)
+    const statusRequest: GetStatusRequest = {
       type: 'GET_STATUS',
-    });
+      ...(slackIds && { channelId: slackIds.channelId, workspaceId: slackIds.workspaceId }),
+    };
+
+    if (!slackIds) {
+      // Non-Slack tab — show web clip mode
+      activeTabId = tab?.id ?? null;
+      activeTabUrl = activeUrl;
+      activeTabTitle = tab?.title || activeUrl;
+      clipPageTitle.textContent = activeTabTitle;
+      clipPageTitle.title = activeUrl;
+      statusEl.classList.add('hidden');
+      clipControlsEl.classList.remove('hidden');
+      return;
+    }
+
+    const status: StatusResponse = await chrome.runtime.sendMessage(statusRequest);
 
     if (!status.hasToken) {
       statusEl.textContent = 'No Slack session detected. Please open Slack and refresh the page.';

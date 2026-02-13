@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script type="module" crossorigin src="/assets/popup.html-zdKYGxqg.js"></script>
+  <script type="module" crossorigin src="/assets/popup.html-BI8miJvP.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="stylesheet" crossorigin href="/assets/popup-BZas8PaL.css">
+  <link rel="modulepreload" crossorigin href="/assets/url-parser-DW0nA-39.js">
+  <link rel="modulepreload" crossorigin href="/assets/constants-I65fpLFJ.js">
+  <link rel="modulepreload" crossorigin href="/assets/frontmatter-BOATe5ZA.js">
+  <link rel="stylesheet" crossorigin href="/assets/popup-DSghHJYd.css">
 </head>
 <body>
   <div class="container">
@@ -67,6 +70,32 @@
 
       <div id="result" class="result hidden">
         <span id="result-message"></span>
+      </div>
+    </div>
+
+    <!-- Web clip mode (non-Slack pages) -->
+    <div id="clip-controls" class="controls hidden">
+      <div class="field">
+        <span class="label">Page:</span>
+        <span id="clip-page-title" class="page-title">--</span>
+      </div>
+
+      <div class="field options">
+        <label><input type="checkbox" id="clip-include-frontmatter"> Include YAML frontmatter <a href="#" id="clip-frontmatter-settings" class="settings-link" title="Frontmatter settings">&#9881;</a></label>
+      </div>
+
+      <div id="clip-progress" class="progress hidden">
+        <div class="progress-bar"><div id="clip-progress-fill" class="progress-fill"></div></div>
+        <span id="clip-progress-text" class="progress-text">Extracting...</span>
+      </div>
+
+      <div class="actions">
+        <button id="clip-copy-btn" class="btn btn-primary">Clip as Markdown</button>
+        <button id="clip-download-btn" class="btn btn-secondary">Download .md</button>
+      </div>
+
+      <div id="clip-result" class="result hidden">
+        <span id="clip-result-message"></span>
       </div>
     </div>
 

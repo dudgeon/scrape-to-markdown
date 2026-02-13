@@ -6,6 +6,7 @@
   "permissions": [
     "activeTab",
     "clipboardWrite",
+    "scripting",
     "storage",
     "cookies",
     "webRequest"
@@ -18,7 +19,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.ts-loader-CTQUeO4M.js"
+        "assets/index.ts-loader-DcUrAqJl.js"
       ],
       "matches": [
         "https://app.slack.com/*"
@@ -51,7 +52,8 @@
       ],
       "resources": [
         "assets/constants-I65fpLFJ.js",
-        "assets/index.ts-C-KoU3RY.js"
+        "assets/url-parser-DW0nA-39.js",
+        "assets/index.ts-Dx3il9W1.js"
       ],
       "use_dynamic_url": false
     }

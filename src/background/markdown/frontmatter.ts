@@ -153,6 +153,46 @@ export function buildFrontmatterFromTemplate(
   return serializeFrontmatter(resolved);
 }
 
+// --- Web clip frontmatter ---
+
+/** Context for web clip frontmatter generation */
+export interface WebClipFrontmatterContext {
+  title: string;
+  sourceUrl: string;
+  author?: string;
+  siteName?: string;
+  excerpt?: string;
+}
+
+/**
+ * Build a flat template context for web clip frontmatter.
+ * Maps clip metadata into the variable namespace that templates reference.
+ */
+export function buildWebClipTemplateContext(ctx: WebClipFrontmatterContext): TemplateContext {
+  return {
+    title: ctx.title,
+    source_category: 'web-clip',
+    source_url: ctx.sourceUrl,
+    author: ctx.author ?? '',
+    site_name: ctx.siteName ?? '',
+    excerpt: ctx.excerpt ?? '',
+    captured: new Date(),
+  };
+}
+
+/**
+ * Build frontmatter from a user-configured template + web clip context.
+ * Returns the complete YAML frontmatter string (with --- delimiters).
+ */
+export function buildWebClipFrontmatterFromTemplate(
+  template: FrontmatterTemplate,
+  ctx: WebClipFrontmatterContext,
+): string {
+  const templateContext = buildWebClipTemplateContext(ctx);
+  const resolved = resolveTemplate(template.frontmatter, templateContext);
+  return serializeFrontmatter(resolved);
+}
+
 /**
  * Build the complete YAML frontmatter string for a Slack export
  * using the fixed default template (Phase A fallback).

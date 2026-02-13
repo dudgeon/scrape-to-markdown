@@ -79,6 +79,14 @@ h1 {
   color: #7eb8ff;
 }
 
+.page-title {
+  font-size: 13px;
+  color: #c8c8e0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Radio group */
 .radio-group {
   display: flex;

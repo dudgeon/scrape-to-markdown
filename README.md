@@ -1,6 +1,6 @@
 # scrape-to-markdown (s2md)
 
-A Chrome extension that scrapes web content — starting with Slack conversations — and converts it to clean markdown. Uses Slack's internal API to capture full message history including threads, reactions, and file references. Future phases add general web page clipping via Readability.js + Turndown.js.
+A Chrome extension that scrapes web content and converts it to clean markdown. Two modes: **Slack conversation export** (full message history via API, with threads, reactions, and frontmatter) and **web page clipping** (any page via Readability.js + Turndown.js). The popup auto-detects which mode to use based on the active tab.
 
 <p align="center">
   <img src="docs/images/s2md-flow.png" alt="s2md flow: Slack conversations and web content → s2md extension → clean markdown → your AI of choice" width="700">
@@ -32,9 +32,8 @@ This extension is distributed as an **unpacked Chrome extension** (Chrome Web St
    - Find "scrape-to-markdown (s2md)" and click the pin icon
 
 4. **Use it**
-   - Navigate to any Slack channel at `app.slack.com`
-   - Click the extension icon — it detects the channel automatically
-   - Choose your scope and options, then copy or download
+   - **Slack**: Navigate to any Slack channel at `app.slack.com`, click the icon — it detects the channel automatically. Choose scope and options, then copy or download.
+   - **Web clipping**: Navigate to any web page, click the icon — it extracts the article content and converts to markdown. Select text first to clip just the selection.
 
 ### Updating
 
@@ -48,7 +47,17 @@ Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** 
 
 ## Features
 
-### Capture Modes
+### Web Page Clipping
+
+- Click the extension icon on any non-Slack page to clip the article as markdown
+- Uses [Readability.js](https://github.com/mozilla/readability) for article extraction and [Turndown.js](https://github.com/mixmark-io/turndown) for HTML-to-markdown conversion
+- GFM support: tables and strikethrough via the Turndown GFM plugin
+- Custom rules for `<figure>` elements (preserves captions), `<video>`, and `<iframe>` embeds
+- **Selection clipping**: select text before clicking to clip just the selection
+- Optional YAML frontmatter (title, author, source URL, capture date)
+- Falls back to full `<body>` conversion if Readability can't extract the article
+
+### Slack Capture Modes
 
 | Mode | Description |
 |------|-------------|
@@ -74,7 +83,7 @@ Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** 
 ### Frontmatter Templates
 
 - Customizable `{{variable|filter}}` template engine for YAML frontmatter fields
-- Built-in templates: Slack Default and Slack Detailed
+- Built-in templates: Slack Default, Slack Detailed, and Web Clip Default
 - Settings page (gear icon) to create, edit, and manage custom templates
 - Live preview of rendered YAML while editing
 - 8 filters: `date`, `lowercase`, `uppercase`, `default`, `join`, `slug`, `trim`, `truncate`
@@ -88,7 +97,10 @@ Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** 
 
 ## How It Works
 
-The extension passively captures your existing Slack session token (`xoxc-`) from Slack's own HTTP requests (via `chrome.webRequest`) and uses it to call Slack's `conversations.history` API directly. This bypasses Slack's virtual scrolling limitation (which only keeps ~50 messages in the DOM) and returns structured rich text data that converts cleanly to markdown.
+The popup detects the active tab and switches modes automatically:
+
+- **Slack tabs** (`app.slack.com`): The extension passively captures your existing Slack session token (`xoxc-`) from Slack's own HTTP requests (via `chrome.webRequest`) and uses it to call Slack's `conversations.history` API directly. This bypasses Slack's virtual scrolling limitation (which only keeps ~50 messages in the DOM) and returns structured rich text data that converts cleanly to markdown.
+- **All other tabs**: The extension injects a content script that clones the page DOM, extracts the article via Readability.js, and converts it to markdown via Turndown.js. All processing happens locally in the browser.
 
 ## Privacy & Security
 
@@ -112,11 +124,10 @@ npm run typecheck    # typescript check only
 
 ## Known Limitations
 
-- **Last Slack tab wins**: when multiple Slack tabs are open, the popup shows whichever channel was detected most recently — not necessarily the active tab. On non-Slack tabs the popup may show stale data. See [tab-aware detection](docs/backlog-tab-aware-channel-detection.md) for the planned fix.
 - **Enterprise Grid**: only exports the currently-viewed workspace (no org-level token support)
 - **Rate limits**: large channels (10K+ messages) will take time due to 1-second delays between API pages
 - **Refresh required after install**: Chrome doesn't inject content scripts into already-open tabs when an extension is loaded. Refresh the Slack tab after installing or updating.
-- **DOM fallback**: not yet implemented (planned for a future release)
+- **Web clip extraction**: some pages with heavy JavaScript rendering or paywalls may not extract cleanly. The extension falls back to converting the full page body when Readability can't identify the article.
 
 ## Version
 
