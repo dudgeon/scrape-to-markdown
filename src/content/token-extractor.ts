@@ -8,7 +8,7 @@ const INJECTED_CODE = `
     var bd = window.boot_data || (window.TS && window.TS.boot_data);
     var token = bd && bd.api_token;
     if (token && typeof token === 'string' && token.startsWith('xoxc-')) {
-      window.postMessage({ type: '__SLACK_COPIER_TOKEN__', token: token }, 'https://app.slack.com');
+      window.postMessage({ type: '__S2MD_TOKEN__', token: token }, 'https://app.slack.com');
     }
   } catch(e) {}
 })();
@@ -30,7 +30,7 @@ export function startTokenExtraction(): void {
   window.addEventListener('message', (event) => {
     if (
       event.origin !== 'https://app.slack.com' ||
-      event.data?.type !== '__SLACK_COPIER_TOKEN__'
+      event.data?.type !== '__S2MD_TOKEN__'
     ) {
       return;
     }
