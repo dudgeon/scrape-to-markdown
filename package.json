@@ -8,7 +8,9 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:userscript": "vite build --config vite.userscript.config.ts",
+    "typecheck:userscript": "tsc --noEmit -p tsconfig.userscript.json"
   },
   "keywords": [],
   "author": "",

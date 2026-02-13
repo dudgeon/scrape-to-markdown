@@ -1,0 +1,15 @@
+// ==UserScript==
+// @name         scrape-to-markdown (s2md)
+// @namespace    https://github.com/dudgeon/scrape-to-markdown
+// @version      0.1.0
+// @description  Export Slack conversations as clean markdown
+// @author       dudgeon
+// @match        https://app.slack.com/*
+// @grant        GM_xmlhttpRequest
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_deleteValue
+// @connect      slack.com
+// @updateURL    https://raw.githubusercontent.com/dudgeon/scrape-to-markdown/main/s2md.user.js
+// @downloadURL  https://raw.githubusercontent.com/dudgeon/scrape-to-markdown/main/s2md.user.js
+// ==/UserScript==

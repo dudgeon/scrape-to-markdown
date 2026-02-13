@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": []
+  },
+  "include": [
+    "src/userscript/**/*.ts",
+    "src/userscript/**/*.d.ts",
+    "src/core/**/*.ts",
+    "src/background/markdown/**/*.ts",
+    "src/background/slack-api.ts",
+    "src/background/user-cache.ts",
+    "src/shared/**/*.ts",
+    "src/platform/**/*.ts",
+    "src/adapters/userscript/**/*.ts",
+    "src/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "tests"]
+}
