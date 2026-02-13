@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Token extraction: replaced blob URL page injection with passive `chrome.webRequest` listeners — fixes Slack CSP blocking and compatibility with Slack client-v2 which no longer exposes `window.boot_data` (#1)
+- Channel detection: added `CHANNEL_DETECTED` message handler in service worker and `chrome.storage.session.setAccessLevel()` call — content scripts can now write to session storage (MV3 restriction)
+
 ### Added
 
 - YAML frontmatter generation with fixed default Slack template (title, source, workspace, channel, dates, message count, tags)

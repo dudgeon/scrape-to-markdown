@@ -8,7 +8,7 @@ A Chrome extension that scrapes web content — starting with Slack conversation
 
 ## Installation
 
-This extension is distributed as an **unpacked Chrome extension** (not on the Chrome Web Store).
+This extension is distributed as an **unpacked Chrome extension** (Chrome Web Store submission pending review).
 
 ### Prerequisites
 
@@ -29,7 +29,7 @@ This extension is distributed as an **unpacked Chrome extension** (not on the Ch
 
 3. **Pin the extension** (recommended)
    - Click the puzzle-piece icon in the Chrome toolbar
-   - Find "Slack Conversation Copier" and click the pin icon
+   - Find "scrape-to-markdown (s2md)" and click the pin icon
 
 4. **Use it**
    - Navigate to any Slack channel at `app.slack.com`
@@ -88,7 +88,7 @@ Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** 
 
 ## How It Works
 
-The extension extracts your existing Slack session token (`xoxc-`) from the page and uses it to call Slack's `conversations.history` API directly. This bypasses Slack's virtual scrolling limitation (which only keeps ~50 messages in the DOM) and returns structured rich text data that converts cleanly to markdown.
+The extension passively captures your existing Slack session token (`xoxc-`) from Slack's own HTTP requests (via `chrome.webRequest`) and uses it to call Slack's `conversations.history` API directly. This bypasses Slack's virtual scrolling limitation (which only keeps ~50 messages in the DOM) and returns structured rich text data that converts cleanly to markdown.
 
 ## Privacy & Security
 
@@ -112,9 +112,10 @@ npm run typecheck    # typescript check only
 
 ## Known Limitations
 
+- **Last Slack tab wins**: when multiple Slack tabs are open, the popup shows whichever channel was detected most recently — not necessarily the active tab. On non-Slack tabs the popup may show stale data. See [tab-aware detection](docs/backlog-tab-aware-channel-detection.md) for the planned fix.
 - **Enterprise Grid**: only exports the currently-viewed workspace (no org-level token support)
 - **Rate limits**: large channels (10K+ messages) will take time due to 1-second delays between API pages
-- **Token extraction**: depends on `window.boot_data.api_token` being available — if Slack changes this, the extension will need updating
+- **Refresh required after install**: Chrome doesn't inject content scripts into already-open tabs when an extension is loaded. Refresh the Slack tab after installing or updating.
 - **DOM fallback**: not yet implemented (planned for a future release)
 
 ## Version

@@ -68,7 +68,9 @@ Single-file IIFE (`s2md.user.js`) built by `vite.userscript.config.ts`. Runs dir
 
 ### Message protocol
 
-Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` or `FETCH_MESSAGES` to service worker, gets back `StatusResponse` or `FetchMessagesResponse`. Service worker sends `PROGRESS` updates during long operations.
+Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` or `FETCH_MESSAGES` to service worker, gets back `StatusResponse` or `FetchMessagesResponse`. Content script sends `EXTRACT_TOKEN` (wake service worker) and `CHANNEL_DETECTED` (channel navigation). Service worker sends `PROGRESS` updates during long operations.
+
+**Every message type in the union must have a matching `case` in the service worker's switch statement.** Silent drops are hard to debug — grep for `case '` in `index.ts` to verify coverage.
 
 ## Type system
 
@@ -92,6 +94,17 @@ Tests live in `tests/` and cover the pure-function modules. Chrome API interacti
 ## Build Versioning
 
 `package.json` version is the source of truth. `vite.config.ts` injects it as `__BUILD_VERSION__` at compile time. The popup footer displays it. When bumping version: update `package.json`, `src/manifest.json`, and add a `CHANGELOG.md` entry.
+
+## Debugging Chrome Extension Issues
+
+When debugging runtime issues (token extraction, channel detection, API calls):
+
+1. **Audit the full data flow first.** Trace content-script → service-worker → storage → popup before writing code. Check that every message type has a handler, every storage write has a reader, and every API has the required permissions.
+2. **Verify assumptions about external APIs before building solutions.** If you're depending on a page global (like `window.boot_data`), confirm it exists before writing extraction code. Third-party web apps change their internals frequently.
+3. **Prefer the browser network layer over page-world injection.** `chrome.webRequest` is more resilient than page-world JS access. It doesn't depend on the page's CSP, global variables, or script loading order.
+4. **Check MV3 restrictions.** Key gotchas: session storage is service-worker-only by default, `webRequestBlocking` doesn't exist, content scripts don't auto-inject into existing tabs.
+5. **Minimize build-install-test cycles.** Each round requires the user to reinstall the extension and refresh Slack. Batch multiple fixes into one build when possible.
+6. **Add a build tag for manual testing.** Append a tag to the version string (e.g., `v0.1.0-webRequest`) to confirm the right build is loaded. Remove it before committing.
 
 ## Gotchas
 

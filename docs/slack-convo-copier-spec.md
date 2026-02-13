@@ -88,17 +88,13 @@ The user-facing control surface:
 
 ## Token & Auth Flow
 
+> **Note (2026-02):** The original `boot_data` and fetch-interception strategies below are obsolete. Slack client-v2 no longer exposes `window.boot_data`, and Slack's CSP blocks blob URLs. The implementation now uses passive `chrome.webRequest` listeners in the service worker to capture the `xoxc-` token from Slack's own HTTP traffic (Authorization header and POST body). See `src/background/index.ts`.
+
 ```
 User opens Slack in Chrome
-  → Content script injects a <script> tag into the page
-  → Injected script reads window.boot_data.api_token (or TS.boot_data.api_token)
-  → Posts token back to content script via window.postMessage
-  → Content script stores token in chrome.storage.session
-  
-Alternatively:
-  → Content script monkey-patches fetch/XMLHttpRequest
-  → Intercepts any POST to /api/* and extracts the token parameter
-  → This is more resilient to Slack's boot_data structure changing
+  → Service worker's chrome.webRequest listeners observe Slack API traffic
+  → Token captured from Authorization header or POST body token= field
+  → Stored in chrome.storage.session
 
 For the d cookie:
   → Service worker calls chrome.cookies.get({url: "https://app.slack.com", name: "d"})
@@ -410,12 +406,9 @@ function scrapeVisibleMessages() {
 
 ### 1. Token extraction breaks
 
-**Risk**: Slack changes how `boot_data` is structured or stops exposing `api_token` in the page context.
+**Risk**: Slack changes how the token is transmitted in HTTP requests.
 
-**Mitigation**: Multiple extraction strategies in priority order:
-1. `boot_data.api_token` (fastest)
-2. XHR interception on any `/api/` call
-3. Manual paste from DevTools (always works)
+**Mitigation**: The `chrome.webRequest` approach captures the token from any Slack API request (Authorization header or POST body). This is resilient to page-world JS changes since it operates at the browser network layer. As long as Slack sends `xoxc-` tokens in its own API traffic, the extension will capture them.
 
 ### 2. API rate limiting
 
