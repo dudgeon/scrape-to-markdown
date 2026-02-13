@@ -67,6 +67,8 @@ This is the single source of truth for planned work, priorities, and feature sta
 ## Phase 4: General Web Clipping
 
 > Extends the extension to clip any web page as markdown. Depends on the frontmatter system (Phase 3) for metadata on web clips.
+>
+> **Note:** Web clipping has not been implemented or tested yet. The popup currently has no non-Slack mode — on non-Slack tabs it shows stale Slack channel data (see [5.0a](backlog-tab-aware-channel-detection.md)). Tab-aware detection (5.0a) is a prerequisite for 4.3.
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
@@ -101,9 +103,9 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
-| P.A | Interface extraction + extension adapters (refactor, no behavior change) | Backlog | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
-| P.B | Core orchestrator extraction (`export-slack.ts`) | Backlog | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
-| P.C | Userscript adapters + floating panel UI + build config | Backlog | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+| P.A | Interface extraction + extension adapters (refactor, no behavior change) | Done | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+| P.B | Core orchestrator extraction (`export-slack.ts`) | Done | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
+| P.C | Userscript adapters + floating panel UI + build config | Done | [backlog-platform-abstraction-userscript.md](backlog-platform-abstraction-userscript.md) |
 
 ---
 
@@ -113,6 +115,7 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 | # | Item | Status | Spec |
 |---|------|--------|------|
+| 5.0a | **Bug:** Popup has no tab awareness — shows stale Slack channel regardless of active tab | Backlog | [backlog-tab-aware-channel-detection.md](backlog-tab-aware-channel-detection.md) |
 | 5.0 | README overhaul (install instructions, features, privacy) | Backlog | [backlog-readme-changelog-versioning.md](backlog-readme-changelog-versioning.md) |
 | 5.1 | DOM fallback mode ("copy visible" for Slack) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.2 | Multiple token extraction strategies (XHR interception, manual paste) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
