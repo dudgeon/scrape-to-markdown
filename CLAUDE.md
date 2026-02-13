@@ -38,12 +38,13 @@ Chrome-specific code is isolated behind three interfaces in `src/platform/interf
 
 ### Chrome Extension
 
-Four components communicate via `chrome.runtime.sendMessage`:
+Five components communicate via `chrome.runtime.sendMessage`:
 
 - **Content Script** (`src/content/`) — Runs on `app.slack.com`. Wakes the service worker (which captures the `xoxc-` token passively via `chrome.webRequest`). Polls the URL to detect channel navigation and stores the channel/workspace IDs in `chrome.storage.session`.
-- **Service Worker** (`src/background/`) — Captures the `xoxc-` token passively via `chrome.webRequest` listeners on Slack API traffic (Authorization header and POST body). Routes messages: delegates to `exportSlackChannel()` for `FETCH_MESSAGES`, handles `GET_STATUS` and `CHANNEL_DETECTED` directly. Sends `PROGRESS` messages back to the popup.
-- **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Auto-detects Slack vs. non-Slack tabs via `chrome.tabs.query()`. **Slack mode**: scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar. **Web clip mode**: article extraction via `chrome.scripting.executeScript()` + Readability.js + Turndown.js, selection clipping, frontmatter toggle, copy/download. Gear icon opens the options page.
+- **Service Worker** (`src/background/`) — Captures the `xoxc-` token passively via `chrome.webRequest` listeners on Slack API traffic (Authorization header and POST body). Routes messages: delegates to `exportSlackChannel()` for `FETCH_MESSAGES`, handles `GET_STATUS` and `CHANNEL_DETECTED` directly. Registers context menu items via `setupContextMenu()`. Listens for `chrome.commands.onCommand` for keyboard shortcuts. Sends `PROGRESS` messages back to the popup. Skips messages with `target: 'offscreen'` (they're for the offscreen document).
+- **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Auto-detects Slack vs. non-Slack tabs via `chrome.tabs.query()`. **Slack mode**: scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar, retry button for transient errors. **Web clip mode**: article extraction via `chrome.scripting.executeScript()` + Readability.js + Turndown.js, selection clipping, frontmatter toggle, copy/download. Gear icon opens the options page.
 - **Options Page** (`src/options/`) — Vanilla HTML/CSS/TS settings page for frontmatter template editing. Template list, key-value field editor, live preview, create/edit/delete custom templates.
+- **Offscreen Document** (`src/offscreen/`) — Created on demand by the service worker for context menu and keyboard shortcut clipping. Provides DOMParser for Readability.js article extraction (the service worker has no DOM). Listens for `CLIP_PAGE_OFFSCREEN` messages, runs `clipPage()`, returns results.
 
 ### Tampermonkey Userscript
 
@@ -54,7 +55,9 @@ Single-file IIFE (`s2md.user.js`) built by `vite.userscript.config.ts`. Runs dir
 
 ### Key modules
 
-- `src/background/slack-api.ts` — Authenticated Slack API client with cursor-based pagination and 1s rate-limit delays. Uses injected `AuthProvider` + `HttpClient` (call `initSlackApi()` first). Exports `ChannelInfo` (channel metadata type used across the codebase) and `fetchTeamInfo()` for workspace metadata.
+- `src/background/slack-api.ts` — Authenticated Slack API client with cursor-based pagination, 1s rate-limit delays, and automatic retry with exponential backoff. Uses injected `AuthProvider` + `HttpClient` (call `initSlackApi()` first). Exports typed error classes (`SlackApiError`, `SlackAuthError`, `SlackTransientError`), `ChannelInfo`, `fetchTeamInfo()`, and `fetchMembers()`.
+- `src/background/retry.ts` — Generic `withRetry<T>(fn, options)` utility with exponential backoff + jitter. Options: `maxRetries`, `baseDelay`, `maxDelay`, `shouldRetry` predicate, `getRetryAfter` for server-provided delays.
+- `src/background/context-menu.ts` — Context menu registration and handling. `setupContextMenu()` registers "Copy page/selection as Markdown" items. `clipAndBuildMarkdown(tabId, url)` is the shared clip pipeline used by both context menu clicks and keyboard shortcuts — extracts page data, delegates to offscreen document, builds frontmatter, returns markdown.
 - `src/background/user-cache.ts` — Two-tier (memory + storage) cache for user ID → display name. Uses injected `StorageAdapter` (call `initUserCache()` first).
 - `src/background/markdown/rich-text.ts` — Recursive tree walker converting `rich_text` blocks to markdown. Pure function (accepts resolver callbacks, no Chrome deps).
 - `src/background/markdown/mrkdwn.ts` — Regex-based converter for legacy Slack `mrkdwn` format.
@@ -70,7 +73,7 @@ Single-file IIFE (`s2md.user.js`) built by `vite.userscript.config.ts`. Runs dir
 
 ### Message protocol
 
-Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` (with optional `channelId`/`workspaceId` from active tab) or `FETCH_MESSAGES` to service worker, gets back `StatusResponse` or `FetchMessagesResponse`. Content script sends `EXTRACT_TOKEN` (wake service worker) and `CHANNEL_DETECTED` (channel navigation). Service worker sends `PROGRESS` updates during long operations. Web clipping does not use the message protocol — the popup handles extraction directly via `chrome.scripting.executeScript()`.
+Defined in `src/types/messages.ts`. Popup sends `GET_STATUS` (with optional `channelId`/`workspaceId` from active tab) or `FETCH_MESSAGES` to service worker, gets back `StatusResponse` or `FetchMessagesResponse` (with optional `errorCategory`). Content script sends `EXTRACT_TOKEN` (wake service worker) and `CHANNEL_DETECTED` (channel navigation). Service worker sends `PROGRESS` updates during long operations. `CLIP_PAGE_OFFSCREEN` (with `target: 'offscreen'`) is sent from the service worker to the offscreen document for DOM-dependent clipping. The service worker skips messages with `target === 'offscreen'` to avoid handling them twice.
 
 **Every message type in the union must have a matching `case` in the service worker's switch statement.** Silent drops are hard to debug — grep for `case '` in `index.ts` to verify coverage.
 

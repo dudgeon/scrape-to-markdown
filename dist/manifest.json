@@ -1,11 +1,13 @@
 {
   "manifest_version": 3,
   "name": "scrape-to-markdown (s2md)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Clip any web page or Slack conversation as clean markdown — copy to clipboard or download as .md",
   "permissions": [
     "activeTab",
     "clipboardWrite",
+    "contextMenus",
+    "offscreen",
     "scripting",
     "storage",
     "cookies",
@@ -37,6 +39,20 @@
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
+    }
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+M"
+      },
+      "description": "Open s2md popup"
+    },
+    "clip-page": {
+      "suggested_key": {
+        "default": "Alt+Shift+C"
+      },
+      "description": "Copy page as Markdown"
     }
   },
   "options_page": "src/options/options.html",

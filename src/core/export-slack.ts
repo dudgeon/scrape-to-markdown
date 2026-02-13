@@ -1,7 +1,7 @@
 import type { SlackMessage, RichTextBlock } from '../types/slack-api';
 import type { MessageScope } from '../types/messages';
 import { API_DELAY_MS } from '../shared/constants';
-import { fetchMessages, fetchChannelInfo, fetchThreadReplies, fetchTeamInfo } from '../background/slack-api';
+import { fetchMessages, fetchChannelInfo, fetchThreadReplies, fetchTeamInfo, fetchMembers } from '../background/slack-api';
 import { resolveUsers } from '../background/user-cache';
 import { convertMessages } from '../background/markdown/converter';
 import { buildSlackFrontmatter, buildFrontmatterFromTemplate } from '../background/markdown/frontmatter';
@@ -116,6 +116,18 @@ export async function exportSlackChannel(
       // team.info may fail for some workspaces; fall back to empty
     }
 
+    // Fetch participants for DMs/group DMs
+    let participants: string[] | undefined;
+    if (channelInfo.is_im || channelInfo.is_mpim) {
+      try {
+        const memberIds = await fetchMembers(options.channelId);
+        const memberMap = await resolveUsers(memberIds);
+        participants = memberIds.map((id) => memberMap[id] || id);
+      } catch {
+        // Non-critical — skip participants if fetch fails
+      }
+    }
+
     const fmCtx: FrontmatterContext = {
       channel: channelInfo,
       workspaceName: teamInfo.name,
@@ -123,6 +135,7 @@ export async function exportSlackChannel(
       messages,
       messageCount: messages.length,
       scope: options.scope,
+      participants,
     };
 
     let frontmatter: string;

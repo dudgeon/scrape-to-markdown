@@ -28,6 +28,8 @@ const downloadBtn = document.getElementById('download-btn') as HTMLButtonElement
 const resultEl = document.getElementById('result')!;
 const resultMessageEl = document.getElementById('result-message')!;
 const errorEl = document.getElementById('error')!;
+const errorTextEl = document.getElementById('error-text')!;
+const retryBtn = document.getElementById('retry-btn') as HTMLButtonElement;
 const progressEl = document.getElementById('progress')!;
 const progressFill = document.getElementById('progress-fill')!;
 const progressText = document.getElementById('progress-text')!;
@@ -72,6 +74,7 @@ let lastMarkdown: string | null = null;
 let activeTabId: number | null = null;
 let activeTabUrl: string = '';
 let activeTabTitle: string = '';
+let lastExportAction: 'copy' | 'download' | null = null;
 
 // Display build version
 const versionEl = document.querySelector('.version');
@@ -157,7 +160,7 @@ async function exportMessages(): Promise<string | null> {
     });
 
     if (!response.success || !response.markdown) {
-      showError(response.error || 'Export failed');
+      showError(response.error || 'Export failed', response.errorCategory);
       return null;
     }
 
@@ -176,6 +179,7 @@ async function exportMessages(): Promise<string | null> {
 }
 
 copyBtn.addEventListener('click', async () => {
+  lastExportAction = 'copy';
   const markdown = await exportMessages();
   if (markdown) {
     await navigator.clipboard.writeText(markdown);
@@ -184,6 +188,7 @@ copyBtn.addEventListener('click', async () => {
 });
 
 downloadBtn.addEventListener('click', async () => {
+  lastExportAction = 'download';
   const markdown = await exportMessages();
   if (!markdown) return;
 
@@ -330,10 +335,18 @@ clipDownloadBtn.addEventListener('click', async () => {
   clipResultMessage.textContent += ' — downloaded!';
 });
 
-function showError(message: string) {
-  errorEl.textContent = message;
+function showError(message: string, category?: 'auth' | 'transient' | 'permanent') {
+  errorTextEl.textContent = category === 'auth'
+    ? 'Session expired. Please refresh Slack and try again.'
+    : message;
+  retryBtn.classList.toggle('hidden', category !== 'transient');
   errorEl.classList.remove('hidden');
 }
+
+retryBtn.addEventListener('click', () => {
+  if (lastExportAction === 'copy') copyBtn.click();
+  else if (lastExportAction === 'download') downloadBtn.click();
+});
 
 // Initialize
 async function init() {

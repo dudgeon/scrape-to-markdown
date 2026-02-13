@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-B5Qt9EMX.js";import{c as s}from"./clip-page-Cuq5VKz1.js";chrome.runtime.onMessage.addListener((e,c,t)=>{if(e.type==="CLIP_PAGE_OFFSCREEN"){try{const r=s(e.pageData);t({success:!0,...r})}catch(r){t({success:!1,error:r instanceof Error?r.message:String(r)})}return!0}});

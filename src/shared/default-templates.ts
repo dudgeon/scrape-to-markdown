@@ -41,6 +41,7 @@ export const DEFAULT_TEMPLATES: TemplateStore = {
       channel_type: '{{channel_type}}',
       topic: '{{topic}}',
       purpose: '{{purpose}}',
+      participants: '{{participants|join:", "}}',
       captured: '{{captured|date:"YYYY-MM-DDTHH:mm:ssZ"}}',
       date_range: '{{date_range}}',
       message_count: '{{message_count}}',

@@ -64,7 +64,9 @@ User-created frontmatter templates are stored in `chrome.storage.sync` (synced a
 
 | Permission | Why it's needed |
 |---|---|
-| `activeTab` | Read the active tab's URL to detect Slack vs. non-Slack pages, and inject the web clipping script into the active tab to extract page content |
+| `activeTab` | Read the active tab's URL to detect Slack vs. non-Slack pages, and inject the web clipping script into the active tab to extract page content. Also grants temporary access for context menu and keyboard shortcut clipping. |
+| `contextMenus` | Register right-click menu items ("Copy page as Markdown", "Copy selection as Markdown") for quick clipping without opening the popup |
+| `offscreen` | Create an offscreen document to run DOM-dependent article extraction (Readability.js) when clipping via context menu or keyboard shortcut — the service worker has no DOM access |
 | `scripting` | Inject a content script into the active tab on demand to read page HTML for web clipping (used with `chrome.scripting.executeScript`) |
 | `clipboardWrite` | Copy exported markdown to your clipboard |
 | `cookies` | Read the Slack session cookie (`d`) for API authentication |

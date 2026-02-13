@@ -60,7 +60,7 @@ This is the single source of truth for planned work, priorities, and feature sta
 | 3.4 | Frontmatter on/off toggle in popup | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 | 3.5 | Template editor UI (settings page) | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 | 3.6 | `{{variable\|filter}}` template engine | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
-| 3.7 | Participant list for DMs/group DMs (`conversations.members`) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
+| 3.7 | Participant list for DMs/group DMs (`conversations.members`) | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 
 ---
 
@@ -118,9 +118,9 @@ This is the single source of truth for planned work, priorities, and feature sta
 | 5.1 | DOM fallback mode ("copy visible" for Slack) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.2 | ~~Multiple token extraction strategies~~ — solved by `chrome.webRequest` | Done | — |
 | 5.3 | Side panel UI | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
-| 5.4 | Error handling and retry logic | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
-| 5.5 | Context menu: "Copy as Markdown" right-click | Backlog | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
-| 5.6 | Keyboard shortcut trigger | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
+| 5.4 | Error handling and retry logic | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
+| 5.5 | Context menu: "Copy as Markdown" right-click | Done | [backlog-web-to-markdown.md](backlog-web-to-markdown.md) |
+| 5.6 | Keyboard shortcut trigger | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.7 | Export to HTML / JSON formats | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.8 | Configurable output format (template system for body, not just frontmatter) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.9 | Template import/export (JSON) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |

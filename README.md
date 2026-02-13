@@ -50,6 +50,8 @@ Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** 
 ### Web Page Clipping
 
 - Click the extension icon on any non-Slack page to clip the article as markdown
+- **Right-click context menu**: "Copy page as Markdown" or "Copy selection as Markdown" — no popup needed
+- **Keyboard shortcuts**: `Alt+Shift+M` opens the popup, `Alt+Shift+C` clips the page directly to clipboard
 - Uses [Readability.js](https://github.com/mozilla/readability) for article extraction and [Turndown.js](https://github.com/mixmark-io/turndown) for HTML-to-markdown conversion
 - GFM support: tables and strikethrough via the Turndown GFM plugin
 - Custom rules for `<figure>` elements (preserves captions), `<video>`, and `<iframe>` embeds
@@ -125,10 +127,10 @@ npm run typecheck    # typescript check only
 ## Known Limitations
 
 - **Enterprise Grid**: only exports the currently-viewed workspace (no org-level token support)
-- **Rate limits**: large channels (10K+ messages) will take time due to 1-second delays between API pages
+- **Rate limits**: large channels (10K+ messages) will take time due to 1-second delays between API pages. The extension automatically retries on rate limit errors with exponential backoff.
 - **Refresh required after install**: Chrome doesn't inject content scripts into already-open tabs when an extension is loaded. Refresh the Slack tab after installing or updating.
 - **Web clip extraction**: some pages with heavy JavaScript rendering or paywalls may not extract cleanly. The extension falls back to converting the full page body when Readability can't identify the article.
 
 ## Version
 
-v0.1.0 — see [CHANGELOG.md](CHANGELOG.md) for details.
+v0.2.0 — see [CHANGELOG.md](CHANGELOG.md) for details.

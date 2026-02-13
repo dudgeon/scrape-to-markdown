@@ -38,6 +38,7 @@ export interface FetchMessagesResponse {
   markdown?: string;
   messageCount?: number;
   error?: string;
+  errorCategory?: 'auth' | 'transient' | 'permanent';
 }
 
 export interface StatusResponse {
@@ -55,6 +56,18 @@ export interface ProgressMessage {
   phase: 'fetching' | 'resolving_users' | 'converting' | 'fetching_threads';
 }
 
+// Service Worker -> Offscreen Document
+export interface ClipPageOffscreenRequest {
+  type: 'CLIP_PAGE_OFFSCREEN';
+  target: 'offscreen';
+  pageData: {
+    html: string;
+    url: string;
+    title: string;
+    selectedHtml?: string;
+  };
+}
+
 // Scope types
 export type MessageScope =
   | { mode: 'last_n'; count: number }
@@ -70,4 +83,5 @@ export type ExtensionMessage =
   | GetStatusRequest
   | FetchMessagesResponse
   | StatusResponse
-  | ProgressMessage;
+  | ProgressMessage
+  | ClipPageOffscreenRequest;

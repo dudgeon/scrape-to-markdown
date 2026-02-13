@@ -19,6 +19,11 @@ export interface ConversationsRepliesResponse extends SlackApiResponse {
   has_more: boolean;
 }
 
+// conversations.members
+export interface ConversationsMembersResponse extends SlackApiResponse {
+  members: string[];
+}
+
 // conversations.info
 export interface ConversationsInfoResponse extends SlackApiResponse {
   channel: {

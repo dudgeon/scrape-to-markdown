@@ -12,6 +12,8 @@ export interface FrontmatterContext {
   messages: SlackMessage[];
   messageCount: number;
   scope: MessageScope;
+  /** Resolved display names of channel members (DMs/group DMs only) */
+  participants?: string[];
 }
 
 /**
@@ -123,7 +125,7 @@ export function formatExportScope(scope: MessageScope): string {
  * Maps structured data into the variable namespace that templates reference.
  */
 export function buildSlackTemplateContext(ctx: FrontmatterContext): TemplateContext {
-  return {
+  const context: TemplateContext = {
     channel: ctx.channel.name,
     channel_id: ctx.channel.id,
     channel_type: deriveChannelType(ctx.channel),
@@ -138,6 +140,10 @@ export function buildSlackTemplateContext(ctx: FrontmatterContext): TemplateCont
     message_count: ctx.messageCount,
     export_scope: formatExportScope(ctx.scope),
   };
+  if (ctx.participants && ctx.participants.length > 0) {
+    context.participants = ctx.participants;
+  }
+  return context;
 }
 
 /**
