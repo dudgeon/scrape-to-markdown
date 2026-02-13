@@ -10,6 +10,7 @@
 // @grant        GM_setValue
 // @grant        GM_deleteValue
 // @connect      slack.com
+// @run-at       document-idle
 // @updateURL    https://raw.githubusercontent.com/dudgeon/scrape-to-markdown/main/s2md.user.js
 // @downloadURL  https://raw.githubusercontent.com/dudgeon/scrape-to-markdown/main/s2md.user.js
 // ==/UserScript==
