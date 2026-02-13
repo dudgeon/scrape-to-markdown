@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) that scrapes web content and converts it to clean markdown. Currently implements Slack conversation capture via the internal `xoxc-` session token and `conversations.history` API, with configurable YAML frontmatter and a `{{variable|filter}}` template engine. Future phases add general web page clipping (Readability.js + Turndown.js).
+**scrape-to-markdown** (s2md) — a Chrome Extension (Manifest V3) and Tampermonkey userscript that scrapes web content and converts it to clean markdown. Currently implements Slack conversation capture via the internal `xoxc-` session token and `conversations.history` API, with configurable YAML frontmatter and a `{{variable|filter}}` template engine. Future phases add general web page clipping (Readability.js + Turndown.js).
+
+The extension is submitted to the Chrome Web Store (pending review). The userscript (`s2md.user.js`) is an alternative distribution for environments where unpacked extensions are disabled — install via Tampermonkey from the GitHub raw URL.
 
 The Slack feature specification lives in `docs/slack-convo-copier-spec.md`. See `docs/ROADMAP.md` for the full feature roadmap.
 
@@ -17,22 +19,43 @@ Requires Node >= 20 (`.nvmrc` is set to 20).
 - `npm run typecheck` — TypeScript check only
 - `npm test` — Run all Vitest tests
 - `npm run test:watch` — Run tests in watch mode
+- `npm run build:userscript` — Build Tampermonkey userscript to `s2md.user.js`
+- `npm run typecheck:userscript` — TypeScript check userscript (excludes Chrome APIs)
 
 To load the extension: open `chrome://extensions`, enable Developer Mode, click "Load unpacked", select the `dist/` folder.
 
+To install the userscript: install Tampermonkey, then open `https://raw.githubusercontent.com/dudgeon/scrape-to-markdown/main/s2md.user.js` — Tampermonkey auto-detects `.user.js` URLs.
+
 ## Architecture
 
-Three components communicate via `chrome.runtime.sendMessage`:
+### Platform abstraction
 
-- **Content Script** (`src/content/`) — Runs on `app.slack.com`. Injects a blob-URL page script to read `window.boot_data.api_token`, stores the `xoxc-` token in `chrome.storage.session`. Polls the URL to detect channel navigation.
-- **Service Worker** (`src/background/`) — Message router that orchestrates: Slack API calls → user name resolution → markdown conversion. Handles `GET_STATUS` and `FETCH_MESSAGES` message types. Sends `PROGRESS` messages back to the popup.
+Chrome-specific code is isolated behind three interfaces in `src/platform/interfaces.ts`: `AuthProvider`, `HttpClient`, `StorageAdapter`. Both the extension and userscript provide their own implementations.
+
+- `src/adapters/extension/` — Extension adapters wrapping `chrome.storage`, `chrome.cookies`, `fetch()`
+- `src/adapters/userscript/` — Userscript adapters wrapping `GM_xmlhttpRequest`, `GM_getValue`/`GM_setValue`, `window.boot_data`
+- `src/core/export-slack.ts` — Platform-agnostic orchestrator. Both entry points call `exportSlackChannel()` with an `onProgress` callback.
+
+### Chrome Extension
+
+Four components communicate via `chrome.runtime.sendMessage`:
+
+- **Content Script** (`src/content/`) — Runs on `app.slack.com`. Wakes the service worker (which captures the `xoxc-` token passively via `chrome.webRequest`). Polls the URL to detect channel navigation and stores the channel/workspace IDs in `chrome.storage.session`.
+- **Service Worker** (`src/background/`) — Captures the `xoxc-` token passively via `chrome.webRequest` listeners on Slack API traffic (Authorization header and POST body). Routes messages: delegates to `exportSlackChannel()` for `FETCH_MESSAGES`, handles `GET_STATUS` and `CHANNEL_DETECTED` directly. Sends `PROGRESS` messages back to the popup.
 - **Popup** (`src/popup/`) — Vanilla HTML/CSS/TS UI. Scope selection (last N, date range, all), thread/reaction/file toggles, copy to clipboard, download as `.md`, progress bar. Gear icon opens the options page.
 - **Options Page** (`src/options/`) — Vanilla HTML/CSS/TS settings page for frontmatter template editing. Template list, key-value field editor, live preview, create/edit/delete custom templates.
 
+### Tampermonkey Userscript
+
+Single-file IIFE (`s2md.user.js`) built by `vite.userscript.config.ts`. Runs directly on `app.slack.com`:
+
+- **Entry** (`src/userscript/index.ts`) — Wires up userscript adapters, detects channel from URL, injects UI.
+- **UI** (`src/userscript/ui.ts`) — Shadow DOM floating panel (bottom-right). Same controls as the popup: scope selector, toggles, copy/download, progress bar. Polls URL for channel changes.
+
 ### Key modules
 
-- `src/background/slack-api.ts` — Authenticated Slack API client with cursor-based pagination and 1s rate-limit delays. Auth = `xoxc-` Bearer token + `d` cookie. Exports `ChannelInfo` (channel metadata type used across the codebase) and `fetchTeamInfo()` for workspace metadata.
-- `src/background/user-cache.ts` — Two-tier (memory + `chrome.storage.local`) cache for user ID → display name.
+- `src/background/slack-api.ts` — Authenticated Slack API client with cursor-based pagination and 1s rate-limit delays. Uses injected `AuthProvider` + `HttpClient` (call `initSlackApi()` first). Exports `ChannelInfo` (channel metadata type used across the codebase) and `fetchTeamInfo()` for workspace metadata.
+- `src/background/user-cache.ts` — Two-tier (memory + storage) cache for user ID → display name. Uses injected `StorageAdapter` (call `initUserCache()` first).
 - `src/background/markdown/rich-text.ts` — Recursive tree walker converting `rich_text` blocks to markdown. Pure function (accepts resolver callbacks, no Chrome deps).
 - `src/background/markdown/mrkdwn.ts` — Regex-based converter for legacy Slack `mrkdwn` format.
 - `src/background/markdown/converter.ts` — Top-level orchestrator: messages[] → full markdown document with date grouping, author lines, thread replies, reactions, files. Supports `skipDocumentHeader` option for frontmatter mode.
@@ -40,7 +63,8 @@ Three components communicate via `chrome.runtime.sendMessage`:
 - `src/background/markdown/frontmatter.ts` — YAML frontmatter generation. Source category detection (`detectSourceCategory`), channel type derivation, YAML serialization (`serializeFrontmatter`), and the top-level `buildSlackFrontmatter()` builder (Phase A fallback). `buildFrontmatterFromTemplate()` resolves user-configured templates via the template engine. `buildSlackTemplateContext()` maps export data to the flat variable namespace. All pure functions.
 - `src/background/markdown/template-engine.ts` — `{{variable|filter}}` template engine. Parses expressions, resolves variables from a context, applies filter chains (date, lowercase, uppercase, default, join, slug, trim, truncate). Type-preserving: single-expression values retain their original type. Pure functions, no Chrome deps.
 - `src/shared/default-templates.ts` — `FrontmatterTemplate` and `TemplateStore` types + `DEFAULT_TEMPLATES` constant (Slack Default, Slack Detailed, Web Clip Default).
-- `src/shared/template-storage.ts` — `chrome.storage.sync` wrapper for template CRUD. `loadTemplates()` merges stored with defaults, `getActiveTemplate(category)` finds the enabled template. Pure helper functions (`mergeWithDefaults`, `findActiveTemplate`) exported for testing.
+- `src/shared/template-storage.ts` — Storage-backed template CRUD. Uses injected `StorageAdapter` (call `initTemplateStorage()` first). `loadTemplates()` merges stored with defaults, `getActiveTemplate(category)` finds the enabled template. Pure helper functions (`mergeWithDefaults`, `findActiveTemplate`) exported for testing.
+- `src/core/export-slack.ts` — Platform-agnostic export orchestrator. `exportSlackChannel(options)` runs the full pipeline: fetch messages → resolve users → convert to markdown → generate frontmatter. Progress via `onProgress` callback.
 
 ### Message protocol
 
@@ -72,10 +96,14 @@ Tests live in `tests/` and cover the pure-function modules. Chrome API interacti
 ## Gotchas
 
 - **Node >= 20 required.** Vite 5, CRXJS, and Vitest all depend on packages that need Node 20+. The `.nvmrc` is set to `20`. Run `nvm use` before any npm commands.
-- **CRXJS does not handle page-world scripts.** The injected script that reads `window.boot_data` must run in the page context (not the extension isolated world). CRXJS can't bundle this as a separate entry. Solution: inline the code as a string in `src/content/token-extractor.ts` and inject via blob URL. Do NOT try to use `chrome.runtime.getURL()` with a separate `.ts` file — CRXJS won't include it in `web_accessible_resources`.
+- **Token extraction uses `chrome.webRequest`, not page-world injection.** Slack client-v2 no longer exposes `window.boot_data`. The service worker passively captures the `xoxc-` token from Slack's own HTTP requests (Authorization header or POST body `token=` field). No blob URLs, no `chrome.scripting.executeScript`, no CSP concerns.
+- **`chrome.storage.session` requires `setAccessLevel` for content script access.** MV3 restricts session storage to the service worker by default. The service worker calls `chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' })` at startup so the content script can also read/write session storage.
 - **`chrome.storage.get()` returns `Record<string, {}>`.** With `strict: true`, values need explicit `as` casts (e.g., `result[KEY] as string | undefined`). Same applies to `chrome.cookies.get()`.
 - **`@crxjs/vite-plugin@beta`** is used because the stable 2.0.0 release was not available at build time. The beta works with Vite 5 but is marked deprecated. Monitor for a stable release.
 - **`__BUILD_VERSION__`** is a Vite `define` constant. Any TS file using it must include `declare const __BUILD_VERSION__: string;` for the type checker.
+- **Userscript build outputs to repo root.** `vite.userscript.config.ts` writes `s2md.user.js` to `.` (not `dist/`). Vite warns about `build.outDir must not be the same directory of root` — this is expected and harmless.
+- **`tsconfig.userscript.json` uses `"types": []`** to exclude `@types/chrome`. This prevents accidental Chrome API usage in userscript code paths. If a module needs Chrome APIs, it shouldn't be in the userscript include list.
+- **Platform modules require initialization.** `slack-api.ts`, `user-cache.ts`, and `template-storage.ts` use module-level `_auth`/`_http`/`_storage` vars set by `init*()` functions. Both entry points (`src/background/index.ts` and `src/userscript/index.ts`) must call these before any API/storage use.
 
 ## Roadmap & Backlog
 

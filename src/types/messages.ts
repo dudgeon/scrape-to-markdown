@@ -4,6 +4,10 @@ export interface TokenReadyMessage {
   token: string;
 }
 
+export interface ExtractTokenMessage {
+  type: 'EXTRACT_TOKEN';
+}
+
 export interface ChannelDetectedMessage {
   type: 'CHANNEL_DETECTED';
   channelId: string;
@@ -58,6 +62,7 @@ export type MessageScope =
 // Union message type
 export type ExtensionMessage =
   | TokenReadyMessage
+  | ExtractTokenMessage
   | ChannelDetectedMessage
   | FetchMessagesRequest
   | GetStatusRequest

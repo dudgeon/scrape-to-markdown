@@ -1,23 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "Slack Conversation Copier",
+  "name": "scrape-to-markdown (s2md)",
   "version": "0.1.0",
   "description": "Copy Slack conversations as clean markdown",
   "permissions": [
     "activeTab",
     "clipboardWrite",
     "storage",
-    "cookies"
+    "cookies",
+    "webRequest"
   ],
   "host_permissions": [
     "https://app.slack.com/*",
-    "https://*.slack.com/*",
-    "https://slack.com/api/*"
+    "https://slack.com/api/*",
+    "https://edgeapi.slack.com/*"
   ],
   "content_scripts": [
     {
       "js": [
-        "assets/index.ts-loader-CqO8B1zO.js"
+        "assets/index.ts-loader-CTQUeO4M.js"
       ],
       "matches": [
         "https://app.slack.com/*"
@@ -50,7 +51,7 @@
       ],
       "resources": [
         "assets/constants-I65fpLFJ.js",
-        "assets/index.ts-ZAbrp5KF.js"
+        "assets/index.ts-C-KoU3RY.js"
       ],
       "use_dynamic_url": false
     }

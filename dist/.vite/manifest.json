@@ -1,6 +1,6 @@
 {
   "../../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-CHL-RSfy.js",
+    "file": "assets/crx-manifest.js-BdyjbOBO.js",
     "name": "crx-manifest.js",
     "src": "../../../../@crx/manifest",
     "isEntry": true
@@ -9,33 +9,33 @@
     "file": "assets/constants-I65fpLFJ.js",
     "name": "constants"
   },
-  "_modulepreload-polyfill-B5Qt9EMX.js": {
-    "file": "assets/modulepreload-polyfill-B5Qt9EMX.js",
-    "name": "modulepreload-polyfill"
-  },
-  "_template-storage-CPUsiW84.js": {
-    "file": "assets/template-storage-CPUsiW84.js",
-    "name": "template-storage",
+  "_frontmatter-DagCZPSx.js": {
+    "file": "assets/frontmatter-DagCZPSx.js",
+    "name": "frontmatter",
     "imports": [
       "_constants-I65fpLFJ.js"
     ]
   },
+  "_modulepreload-polyfill-B5Qt9EMX.js": {
+    "file": "assets/modulepreload-polyfill-B5Qt9EMX.js",
+    "name": "modulepreload-polyfill"
+  },
   "index.ts-loader.js": {
-    "file": "assets/index.ts-loader-CqO8B1zO.js",
+    "file": "assets/index.ts-loader-CTQUeO4M.js",
     "src": "index.ts-loader.js"
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-CPw9EFWp.js",
+    "file": "assets/index.ts-DT9Uz38b.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true,
     "imports": [
       "_constants-I65fpLFJ.js",
-      "_template-storage-CPUsiW84.js"
+      "_frontmatter-DagCZPSx.js"
     ]
   },
   "src/content/index.ts": {
-    "file": "assets/index.ts-ZAbrp5KF.js",
+    "file": "assets/index.ts-C-KoU3RY.js",
     "name": "index.ts",
     "src": "src/content/index.ts",
     "isEntry": true,
@@ -44,13 +44,13 @@
     ]
   },
   "src/options/options.html": {
-    "file": "assets/options.html-Dz0j9qYg.js",
+    "file": "assets/options.html-B43dvXCu.js",
     "name": "options.html",
     "src": "src/options/options.html",
     "isEntry": true,
     "imports": [
       "_modulepreload-polyfill-B5Qt9EMX.js",
-      "_template-storage-CPUsiW84.js",
+      "_frontmatter-DagCZPSx.js",
       "_constants-I65fpLFJ.js"
     ],
     "css": [
