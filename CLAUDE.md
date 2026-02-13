@@ -154,7 +154,8 @@ Multiple Claude Code agents may work on this repo concurrently on the same branc
   - New test files under `tests/`
   - New spec files under `docs/`
 - **When adding a new option/toggle**, keep changes to popup.html and popup.ts as small as possible (one checkbox line, one element reference, one property in the request object).
-- **Run `npm test` and `npm run typecheck`** before considering work complete. Do not commit code that breaks existing tests. If a test from another agent is failing, note it but do not fix or delete it.
+- **Run `npm test`, `npm run typecheck`, and `npm run typecheck:userscript`** before considering work complete. Do not commit code that breaks existing tests. If a test from another agent is failing, note it but do not fix or delete it.
+- **Dual-platform rule**: The Chrome extension and Tampermonkey userscript share all code under `src/background/markdown/`, `src/core/`, `src/shared/`, and `src/types/`. Any change to these shared modules affects both platforms. When modifying shared code, verify the userscript typecheck passes (`npm run typecheck:userscript`) — it uses a separate `tsconfig.userscript.json` that excludes Chrome APIs. If a change requires Chrome-specific APIs, it must go in `src/adapters/extension/` or `src/background/index.ts`, never in the shared layer.
 
 ## Documentation Maintenance
 

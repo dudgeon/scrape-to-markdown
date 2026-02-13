@@ -42,6 +42,10 @@ This extension is distributed as an **unpacked Chrome extension** (not on the Ch
 2. If building from source: `npm run build`
 3. Go to `chrome://extensions/` and click the refresh icon on the extension card
 
+### Alternative: Tampermonkey Userscript
+
+Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** with the same features and identical markdown output. See the [Tampermonkey install guide](docs/tampermonkey-install.md) for setup instructions.
+
 ## Features
 
 ### Capture Modes
