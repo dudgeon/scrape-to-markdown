@@ -1,20 +1,25 @@
+import type { StorageAdapter } from '../platform/interfaces';
 import { STORAGE_KEYS } from '../shared/constants';
 import { fetchUserInfo } from './slack-api';
 
 type UserCacheMap = Record<string, string>;
 
+let _storage: StorageAdapter;
 let memoryCache: UserCacheMap = {};
 let loaded = false;
 
+export function initUserCache(storage: StorageAdapter): void {
+  _storage = storage;
+}
+
 async function loadCache(): Promise<void> {
   if (loaded) return;
-  const result = await chrome.storage.local.get(STORAGE_KEYS.USER_CACHE);
-  memoryCache = (result[STORAGE_KEYS.USER_CACHE] as UserCacheMap | undefined) || {};
+  memoryCache = (await _storage.get<UserCacheMap>(STORAGE_KEYS.USER_CACHE)) || {};
   loaded = true;
 }
 
 async function persistCache(): Promise<void> {
-  await chrome.storage.local.set({ [STORAGE_KEYS.USER_CACHE]: memoryCache });
+  await _storage.set(STORAGE_KEYS.USER_CACHE, memoryCache);
 }
 
 export async function resolveUser(userId: string): Promise<string> {

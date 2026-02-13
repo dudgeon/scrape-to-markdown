@@ -6,40 +6,39 @@ import type {
   UsersInfoResponse,
   SlackMessage,
 } from '../types/slack-api';
-import { SLACK_API_BASE, API_DELAY_MS, API_PAGE_LIMIT, STORAGE_KEYS } from '../shared/constants';
+import type { AuthProvider, HttpClient } from '../platform/interfaces';
+import { SLACK_API_BASE, API_DELAY_MS, API_PAGE_LIMIT } from '../shared/constants';
 
-async function getAuth(): Promise<{ token: string; cookie: string }> {
-  const result = await chrome.storage.session.get(STORAGE_KEYS.TOKEN);
-  const token = result[STORAGE_KEYS.TOKEN] as string | undefined;
-  if (!token) throw new Error('No token available. Open Slack and refresh the page.');
+let _auth: AuthProvider;
+let _http: HttpClient;
 
-  const cookie = await chrome.cookies.get({
-    url: 'https://app.slack.com',
-    name: 'd',
-  });
-  if (!cookie) throw new Error('No session cookie found. Make sure you are logged into Slack.');
-
-  return { token, cookie: `d=${cookie.value}` };
+export function initSlackApi(auth: AuthProvider, http: HttpClient): void {
+  _auth = auth;
+  _http = http;
 }
 
 async function slackApiCall<T>(method: string, params: Record<string, string>): Promise<T> {
-  const { token, cookie } = await getAuth();
+  const token = await _auth.getToken();
+  if (!token) throw new Error('No token available. Open Slack and refresh the page.');
 
-  const response = await fetch(`${SLACK_API_BASE}/${method}`, {
-    method: 'POST',
-    headers: {
+  const cookie = await _auth.getCookie();
+  if (!cookie) throw new Error('No session cookie found. Make sure you are logged into Slack.');
+
+  const response = await _http.post(
+    `${SLACK_API_BASE}/${method}`,
+    {
       'Authorization': `Bearer ${token}`,
       'Cookie': cookie,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams(params).toString(),
-  });
+    new URLSearchParams(params).toString(),
+  );
 
   const data = (await response.json()) as T & { ok: boolean; error?: string };
 
   if (!data.ok) {
     if (data.error === 'invalid_auth' || data.error === 'token_revoked') {
-      await chrome.storage.session.remove(STORAGE_KEYS.TOKEN);
+      await _auth.clearToken();
       throw new Error('AUTH_EXPIRED');
     }
     throw new Error(`Slack API error: ${data.error}`);

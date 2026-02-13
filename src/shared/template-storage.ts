@@ -1,9 +1,16 @@
+import type { StorageAdapter } from '../platform/interfaces';
 import { STORAGE_KEYS } from './constants';
 import {
   DEFAULT_TEMPLATES,
   type FrontmatterTemplate,
   type TemplateStore,
 } from './default-templates';
+
+let _storage: StorageAdapter;
+
+export function initTemplateStorage(storage: StorageAdapter): void {
+  _storage = storage;
+}
 
 /**
  * Merge stored templates with defaults.
@@ -38,16 +45,15 @@ export function findActiveTemplate(
   return null;
 }
 
-/** Load all templates from sync storage, merging with defaults. */
+/** Load all templates from storage, merging with defaults. */
 export async function loadTemplates(): Promise<TemplateStore> {
-  const result = await chrome.storage.sync.get(STORAGE_KEYS.TEMPLATES);
-  const stored = result[STORAGE_KEYS.TEMPLATES] as TemplateStore | undefined;
+  const stored = await _storage.get<TemplateStore>(STORAGE_KEYS.TEMPLATES);
   return mergeWithDefaults(stored ?? null);
 }
 
-/** Save the full template store to sync storage. */
+/** Save the full template store to storage. */
 export async function saveTemplates(templates: TemplateStore): Promise<void> {
-  await chrome.storage.sync.set({ [STORAGE_KEYS.TEMPLATES]: templates });
+  await _storage.set(STORAGE_KEYS.TEMPLATES, templates);
 }
 
 /** Get the active template for a category. Returns null if none found. */
@@ -60,5 +66,5 @@ export async function getActiveTemplate(
 
 /** Remove stored templates, reverting to defaults on next load. */
 export async function resetTemplates(): Promise<void> {
-  await chrome.storage.sync.remove(STORAGE_KEYS.TEMPLATES);
+  await _storage.remove(STORAGE_KEYS.TEMPLATES);
 }

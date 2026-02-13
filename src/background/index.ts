@@ -7,12 +7,20 @@ import type {
 } from '../types/messages';
 import type { SlackMessage, RichTextBlock } from '../types/slack-api';
 import { STORAGE_KEYS, API_DELAY_MS } from '../shared/constants';
-import { fetchMessages, fetchChannelInfo, fetchThreadReplies, fetchTeamInfo } from './slack-api';
-import { resolveUsers } from './user-cache';
+import { fetchMessages, fetchChannelInfo, fetchThreadReplies, fetchTeamInfo, initSlackApi } from './slack-api';
+import { resolveUsers, initUserCache } from './user-cache';
 import { convertMessages } from './markdown/converter';
 import { buildSlackFrontmatter, buildFrontmatterFromTemplate } from './markdown/frontmatter';
 import type { FrontmatterContext } from './markdown/frontmatter';
-import { getActiveTemplate } from '../shared/template-storage';
+import { getActiveTemplate, initTemplateStorage } from '../shared/template-storage';
+import { ExtensionAuthProvider } from '../adapters/extension/auth';
+import { ExtensionHttpClient } from '../adapters/extension/http';
+import { ExtensionLocalStorage, ExtensionSyncStorage } from '../adapters/extension/storage';
+
+// Initialize platform adapters
+initSlackApi(new ExtensionAuthProvider(), new ExtensionHttpClient());
+initUserCache(new ExtensionLocalStorage());
+initTemplateStorage(new ExtensionSyncStorage());
 
 chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse) => {

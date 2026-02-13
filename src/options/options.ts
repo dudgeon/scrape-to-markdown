@@ -1,7 +1,12 @@
 import {
   loadTemplates,
   saveTemplates,
+  initTemplateStorage,
 } from '../shared/template-storage';
+import { ExtensionSyncStorage } from '../adapters/extension/storage';
+
+// Initialize platform adapter (options page runs in its own context)
+initTemplateStorage(new ExtensionSyncStorage());
 import {
   BUILTIN_TEMPLATE_IDS,
   DEFAULT_TEMPLATES,
