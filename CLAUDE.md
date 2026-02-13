@@ -197,5 +197,20 @@ When implementing changes that meet ANY of these criteria, update the correspond
 - **New backlog spec** → add to `docs/ROADMAP.md` with correct phase and status
 - **Completed backlog item** → mark as Done in `docs/ROADMAP.md`
 - **Fully implemented spec/PRD** → move the spec file from `docs/` to `docs/archive/` once all items in the spec are Done. Update any roadmap links to point to the new path.
+- **Manifest permission change** → update `docs/privacy-policy.md` (permissions table + data usage), manifest `description` field, and CWS store listing. Never add a permission before the code that uses it ships — CWS rejects unused permissions.
 
 The README is the user-facing doc. CLAUDE.md is the developer-facing doc. The roadmap is the planning doc. All three must stay current. The `docs/archive/` folder holds completed specs for historical reference.
+
+## Retro Discipline
+
+After completing a significant phase, feature, or encountering a notable failure (CWS rejection, debugging spiral, etc.), write a retro at `docs/retro-<topic>.md`.
+
+**Retro structure:**
+1. What happened / what went well
+2. What could be improved / root cause
+3. Lessons to encode
+
+**After writing the retro:**
+1. **Encode lessons in CLAUDE.md** — add concrete rules to the relevant section (Design Rules, Gotchas, Documentation Maintenance, etc.). Retros are historical; CLAUDE.md rules are active guidance.
+2. **Update MEMORY.md** — add patterns confirmed across multiple sessions.
+3. **Don't let learnings exist only in the retro.** The retro is the narrative record; CLAUDE.md is where the rules live. If a lesson from a retro isn't encoded as a rule in CLAUDE.md, it will be forgotten.

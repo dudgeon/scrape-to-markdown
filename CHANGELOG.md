@@ -42,6 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Thread replies now render as a grouped blockquote with a `**Thread**` header showing reply count, parent author/time, and a truncated parent message preview for disambiguation
 - Removed per-reply `(thread reply)` labels (redundant with the thread header)
 - Manifest now includes `scripting` permission for on-demand content script injection (web clipping)
+- Updated manifest description to cover both web clipping and Slack export
+- Updated privacy policy to document all permissions (`scripting`, `webRequest`, `activeTab`) and web clipping data flow
 
 ## [0.1.0] — 2026-02-11
 
