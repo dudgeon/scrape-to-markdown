@@ -80,18 +80,18 @@ This is the single source of truth for planned work, priorities, and feature sta
 
 ---
 
-## Unreads Pane Support (Future)
+## Unreads Pane Support
 
-> Scraping the `/unreads` view. Depends on `client.counts` undocumented API. See research notes in project history.
+> Export all unread messages across multiple channels from Slack's `/unreads` view. API-only approach via `client.counts` (undocumented) + `conversations.history`. Two implementation phases: U.A (detection + discovery) and U.B (fetch + output).
 
-| # | Item | Status | Notes |
-|---|------|--------|-------|
-| U.1 | Detect `/unreads` URL and branch to unreads code path | Backlog | Content script URL parser needs to handle literal `unreads` segment |
-| U.2 | `client.counts` → identify channels with unreads | Backlog | Single API call, returns all unread channels/DMs/MPIMs |
-| U.3 | Fetch unread messages per channel (`conversations.info` + `conversations.history`) | Backlog | 2 API calls per unread channel; consider user-selectable channel list |
-| U.4 | Multi-channel markdown output with `## #channel-name` section headers | Backlog | — |
-| U.5 | Thread replies within unreads scrape | Backlog | Requires `conversations.replies` per thread parent — multiplies API calls significantly. Deferred. |
-| U.6 | Collapsed conversation handling | Backlog | DOM-based approach impractical (double virtual scrolling, lazy-loaded sections). API-only path avoids this entirely. |
+| # | Item | Phase | Status | Spec |
+|---|------|-------|--------|------|
+| U.1 | URL detection: extend `parseSlackUrl()` for `/unreads`, popup third mode | U.A | Backlog | [backlog-unreads-pane.md](backlog-unreads-pane.md) |
+| U.2 | `client.counts` → discover channels with unreads, resolve names, show in popup | U.A | Backlog | [backlog-unreads-pane.md](backlog-unreads-pane.md) |
+| U.3 | Per-channel fetch: `conversations.history` with `oldest=last_read` for selected channels | U.B | Backlog | [backlog-unreads-pane.md](backlog-unreads-pane.md) |
+| U.4 | Multi-channel markdown output: `## #channel` headers, h3 date groups, unreads frontmatter | U.B | Backlog | [backlog-unreads-pane.md](backlog-unreads-pane.md) |
+| U.5 | Thread replies within unreads (deferred — API call explosion) | U.C | Backlog | [backlog-unreads-pane.md](backlog-unreads-pane.md) |
+| U.6 | Collapsed conversation handling — not needed (API-only path handles it) | — | Done | [backlog-unreads-pane.md](backlog-unreads-pane.md) |
 
 ---
 
