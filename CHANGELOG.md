@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- **Template import/export** — Export all frontmatter templates as JSON for backup or sharing, and import templates from JSON files via the settings page
+
 ## [0.2.0] — 2026-02-13
 
 ### Added

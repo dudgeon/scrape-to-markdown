@@ -18,6 +18,7 @@ import {
   type TemplateContext,
 } from '../background/markdown/template-engine';
 import { serializeFrontmatter } from '../background/markdown/frontmatter';
+import { validateTemplateStore } from '../shared/template-validation';
 
 // --- Elements ---
 
@@ -33,6 +34,10 @@ const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
 const cancelBtn = document.getElementById('cancel-btn') as HTMLButtonElement;
 const deleteBtn = document.getElementById('delete-btn') as HTMLButtonElement;
 const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
+const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
+const importBtn = document.getElementById('import-btn') as HTMLButtonElement;
+const importFileInput = document.getElementById('import-file') as HTMLInputElement;
+const footerStatus = document.getElementById('footer-status')!;
 
 // --- State ---
 
@@ -275,6 +280,69 @@ async function onReset(): Promise<void> {
   closeEditor();
 }
 
+// --- Import / Export ---
+
+let statusTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showStatus(message: string, isError = false): void {
+  footerStatus.textContent = message;
+  footerStatus.className = 'footer-status ' + (isError ? 'error' : 'success');
+  if (statusTimer) clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    footerStatus.textContent = '';
+    footerStatus.className = 'footer-status';
+  }, 3000);
+}
+
+function onExport(): void {
+  const json = JSON.stringify(templates, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 's2md-templates.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus('Templates exported');
+}
+
+function onImportClick(): void {
+  importFileInput.value = '';
+  importFileInput.click();
+}
+
+async function onImportFile(): Promise<void> {
+  const file = importFileInput.files?.[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      showStatus('Invalid JSON file', true);
+      return;
+    }
+
+    const result = validateTemplateStore(parsed);
+    if (!result.valid) {
+      showStatus(result.error, true);
+      return;
+    }
+
+    // Merge: imported templates overwrite matching IDs, new IDs added
+    const importedCount = Object.keys(result.templates).length;
+    Object.assign(templates, result.templates);
+    await saveTemplates(templates);
+    renderTemplateList();
+    closeEditor();
+    showStatus(`Imported ${importedCount} template${importedCount === 1 ? '' : 's'}`);
+  } catch {
+    showStatus('Failed to read file', true);
+  }
+}
+
 // --- Event listeners ---
 
 addSlackBtn.addEventListener('click', onAddTemplate);
@@ -286,6 +354,9 @@ saveBtn.addEventListener('click', onSave);
 cancelBtn.addEventListener('click', closeEditor);
 deleteBtn.addEventListener('click', onDelete);
 resetBtn.addEventListener('click', onReset);
+exportBtn.addEventListener('click', onExport);
+importBtn.addEventListener('click', onImportClick);
+importFileInput.addEventListener('change', onImportFile);
 
 // --- Init ---
 

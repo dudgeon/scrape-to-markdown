@@ -123,7 +123,7 @@ This is the single source of truth for planned work, priorities, and feature sta
 | 5.6 | Keyboard shortcut trigger | Done | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.7 | Export to HTML / JSON formats | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
 | 5.8 | Configurable output format (template system for body, not just frontmatter) | Backlog | [slack-convo-copier-spec.md](slack-convo-copier-spec.md) |
-| 5.9 | Template import/export (JSON) | Backlog | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
+| 5.9 | Template import/export (JSON) | Done | [backlog-clipboard-frontmatter.md](backlog-clipboard-frontmatter.md) |
 
 ---
 

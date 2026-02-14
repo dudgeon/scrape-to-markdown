@@ -298,5 +298,23 @@ input[type="text"]:focus {
   padding-top: 16px;
   border-top: 1px solid #333355;
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.footer-spacer {
+  flex: 1;
+}
+
+.footer-status {
+  font-size: 12px;
+  transition: opacity 0.3s;
+}
+
+.footer-status.success {
+  color: #a0d0a0;
+}
+
+.footer-status.error {
+  color: #ff8888;
 }

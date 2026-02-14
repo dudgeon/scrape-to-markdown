@@ -89,6 +89,7 @@ Can't load unpacked extensions? s2md also runs as a **Tampermonkey userscript** 
 - Settings page (gear icon) to create, edit, and manage custom templates
 - Live preview of rendered YAML while editing
 - 8 filters: `date`, `lowercase`, `uppercase`, `default`, `join`, `slug`, `trim`, `truncate`
+- **Import/export**: back up templates as JSON or share them with others
 
 ### Markdown Conversion
 
